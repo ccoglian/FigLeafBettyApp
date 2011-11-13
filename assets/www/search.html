@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
-        <title>Login | Fig Leaf Betty</title>
+        <title>Search | Fig Leaf Betty</title>
         <!--<link rel="stylesheet" href="css/master.css" type="text/css" media="screen" />-->
 
         <script src="phonegap.1.2.0.js" type="text/javascript" charset="utf-8"></script> 
@@ -18,20 +18,18 @@
 		<script src="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
-				$('#login').click(function() {
-				alert($('#email').val()+' '+$('#password').val());
-				window.location = "./search.html"
-//					$.getJSON('http://api.alternativeto.net/software/'
-//							+$('#searchBox').val()+'/?count=15', 
-//						function(data) {
-//							var items = data.Items;
-//							var list = $('#list');
-//							list.html("");
-//							$.each(items, function(key, val) {
-//								list.append($(document.createElement('li')).html(val.Name));
-//							});
-//							list.listview("destroy").listview()
-//						});
+				$('#searchButton').click(function() {
+					$.getJSON('http://api.alternativeto.net/software/'
+							+$('#searchBox').val()+'/?count=15', 
+						function(data) {
+							var items = data.Items;
+							var list = $('#list');
+							list.html("");
+							$.each(items, function(key, val) {
+								list.append($(document.createElement('li')).html(val.Name));
+							});
+							list.listview("destroy").listview()
+						});
 				});
 				document.addEventListener("deviceready", onDeviceReady, false);
 			});
@@ -56,32 +54,18 @@
     <body><!--
     	TODO: if logged in skip this
 		--><div data-role="page" id="page" data-theme="b">
-			<div data-role="header" data-theme="e">
-		    	<h1>Fig Leaf Betty Login</h1>
+			<div data-role="header" data-position="fixed" data-theme="e">
+		    	<h1>Fig Leaf Betty's Recipe Search</h1>
 		  	</div>
 		  	<div data-role="content">
-		    	<p>Welcome to Fig Leaf Betty's Mobile Recipe Helper! Please log in or sign up to search recipes, set reminders and share what you're doing with friends!</p>
-		    </div>
-		  	<div data-role="content">
-		    	<!--<a href="login.html" data-role="button" data-icon="arrow-d" data-iconpos="left" data-theme="e">Login</a>
-		    -->
-			    <div data-role="content" data-theme="b">
-	                <table>
-	                    <tr>
-	                        <td><label for="email">Email</label></td>
-	                        <td><input type="text" id="email" name="email" /></td>
-	                    </tr>
-	                    <tr>
-	                        <td><label for="password">Password</label></td>
-	                        <td><input type="password" id="password" name="password" /></td>
-	                    </tr>
-	                </table>
-	                <p>
-	                    <button type="submit" id="login">Login</button>
-	                </p>
-		            New user? <a href="register.html" data-role="button">Sign up!</a>
-		        </div>
-		    </div>
+				<div class="class= ui-body ui-body-b"> 
+				<input type="text" name="search" id="searchBox" value="" data-theme="a" /> 
+				<button type="submit" data-theme="a" id="searchButton">Search</button>     
+				</div>
+			</div>
+			<div data-role="content"> 
+				<ul data-role="listview" id="list"></ul> 
+			</div> 
 		</div>
 	</body>
 </html>
