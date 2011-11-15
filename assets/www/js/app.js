@@ -44,11 +44,7 @@ $('#makeitPage').live('pageinit', function(event) {
     $('#date2').scroller(datePickerOptions);
     $('#date3').scroller(datePickerOptions);
 	$('#setreminders').click(function() {
-		$.mobile.changePage("#recipePage", {
-			transition: "slide",
-			reverse: true,
-			changeHash: true
-		});	
+		window.history.go(-1);
 	});
 });
 
