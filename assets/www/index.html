@@ -3,60 +3,24 @@
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
         <title>Login | Fig Leaf Betty</title>
-        <!--<link rel="stylesheet" href="css/master.css" type="text/css" media="screen" />-->
 
-        <script src="phonegap.1.2.0.js" type="text/javascript" charset="utf-8"></script> 
+        <script src="js/phonegap.1.2.0.js" type="text/javascript" charset="utf-8"></script> 
         <script src="js/xui.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/lawnchair/adaptors/LawnchairAdaptorHelpers.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/lawnchair/adaptors/DOMStorageAdaptor.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/lawnchair/adaptors/WebkitSQLiteAdaptor.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/lawnchair/Lawnchair.js" type="text/javascript" charset="utf-8"></script>
-        <script src="js/dsl.js" type="text/javascript" charset="utf-8"></script>
-        <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.css" />
+        <link rel="stylesheet" href="css/themes/mychlorophyll.css" />
 		<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
 		<script src="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.js"></script>
-		<script type="text/javascript">
-			$(function() {
-				$('#login').click(function() {
-				alert($('#email').val()+' '+$('#password').val());
-				window.location = "./search.html"
-//					$.getJSON('http://api.alternativeto.net/software/'
-//							+$('#searchBox').val()+'/?count=15', 
-//						function(data) {
-//							var items = data.Items;
-//							var list = $('#list');
-//							list.html("");
-//							$.each(items, function(key, val) {
-//								list.append($(document.createElement('li')).html(val.Name));
-//							});
-//							list.listview("destroy").listview()
-//						});
-				});
-				document.addEventListener("deviceready", onDeviceReady, false);
-			});
-			
-			function reachableCallback(reachability) {
-				// There is no consistency on the format of reachability
-				var networkState = reachability.code || reachability;
-				var states = {};
-				states[NetworkStatus.NOT_REACHABLE]                      = 'No network connection';
-				states[NetworkStatus.REACHABLE_VIA_CARRIER_DATA_NETWORK] = 'Carrier data connection';
-				states[NetworkStatus.REACHABLE_VIA_WIFI_NETWORK]         = 'WiFi connection';
-				alert('Connection type: ' + states[networkState]);
-			}
-			
-			// PhoneGap is loaded and it is now safe to make calls PhoneGap methods
-			function onDeviceReady() {
-				navigator.network.isReachable('phonegap.com', reachableCallback);
-			}
-		</script>  	
+        <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
 	</head>
 
     <body><!--
     	TODO: if logged in skip this
-		--><div data-role="page" id="page" data-theme="b">
-			<div data-role="header" data-theme="e">
+		--><div data-role="page" id="indexPage" data-theme="f">
+			<div data-role="header" data-theme="f">
 		    	<h1>Fig Leaf Betty Login</h1>
 		  	</div>
 		  	<div data-role="content">
@@ -65,7 +29,7 @@
 		  	<div data-role="content">
 		    	<!--<a href="login.html" data-role="button" data-icon="arrow-d" data-iconpos="left" data-theme="e">Login</a>
 		    -->
-			    <div data-role="content" data-theme="b">
+			    <div data-role="content" data-theme="f">
 	                <table>
 	                    <tr>
 	                        <td><label for="email">Email</label></td>
