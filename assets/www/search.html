@@ -10,9 +10,9 @@
         <script src="js/lawnchair/adaptors/DOMStorageAdaptor.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/lawnchair/adaptors/WebkitSQLiteAdaptor.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/lawnchair/Lawnchair.js" type="text/javascript" charset="utf-8"></script>
-        <script src="js/MyJqmMods.js" type="text/javascript" charset="utf-8"></script>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0rc3/jquery.mobile-1.0rc3.min.css" />
 		<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+        <script src="js/MyJqmMods.js" type="text/javascript" charset="utf-8"></script>
 		<script src="http://code.jquery.com/mobile/1.0rc3/jquery.mobile-1.0rc3.min.js"></script>
 	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript"></script>
 	    <link href="css/mobiscroll.1.5.2.css" rel="stylesheet" type="text/css" />
@@ -21,6 +21,7 @@
 	</head>
 
     <body>
+<!--    	 TODO add shoping list functionality-->
 		<div data-role="page" id="searchPage" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
 		    	<h1>Recipe Search</h1>
@@ -36,51 +37,14 @@
 		
 		<div data-role="page" id="recipePage" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
-		    	<h1>Kale Salad</h1>
+		    	<h1 id='recipe_title'></h1>
 		    	<a href="#searchPage" data-icon="arrow-l" data-iconpos="left" data-rel="back" data-theme="e">Results</a>
 		    	<a href="#makeitPage" data-icon="check" data-iconpos="right" data-theme="e">Make It!</a>
 		  	</div>
-		  	<div data-role="content" data-theme="f"><!--
-		  	<ul>
-		  	<li><strong>1 Bunch Lacinato Kale</strong> or you can use any other type of kale you like</li>
-		  	<li><strong>2 Tablespoons EVOO</strong> or you can use half an avocado</li>
-		  	<li><strong>2 Teaspoons Sea Salt</strong></li>
-		  	</ul>
-		  	-->
-		  	<p>
-		  	<img alt="Kale Salad" src="img/kalesalad.jpg" width="200" style="float:left; padding-right: 15px;">Kale Salad is my favorite dish! It's good for any meal or even for dessert. I make it about twelve thousand different ways so use your imagination and creativity to make it the way you like best!
-		  	</p><br/>
-		  	<h3>Ingredients</h3>
-		  	<table>
-		  	<tr><td style="white-space: nowrap; vertical-align: top">
-		  	<strong>1 Bunch Lacinato Kale</strong>
-		  	</td><td>
-		  	 or you can use any other type of kale you like
-<!--		  	<br/>-->
-		  	</td>
-		  	</tr>
-		  	<tr><td style="white-space: nowrap; vertical-align: top">
-		  	<strong>2 Tablespoons EVOO</strong>
-		  	</td><td>
-		  	 or you can use half an avocado
-<!--		  	 <br/>-->
-		  	</td>
-		  	</tr>
-		  	<tr><td style="white-space: nowrap; vertical-align: top">
-		  	<strong>2 Teaspoons Sea Salt</strong>
-		  	</td><td>
-<!--		  	 <br/>-->
-		  	</td>
-		  	</tr>
-		  	</table>
-		  	<h3>Directions</h3>
-		  	<ol>
-		  	<li>Massage the kale as hard as you can until it gets darker and softer</li>
-		  	<li>Put whatever you want on it like grapes or pepitas. Enjoy!</li>
-		  	</ol>
-		  	<i>Serves 4</i>
+		  	<div id='recipe_body' data-role="content" data-theme="f">
 			</div>
 		</div>
+		
 		<div data-role="page" id="makeitPage" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
 		    	<h1>Make it!</h1>

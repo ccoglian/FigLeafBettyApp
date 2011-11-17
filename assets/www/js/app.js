@@ -17,6 +17,22 @@ $('#indexPage').live('pageinit', function(event) {
 	document.addEventListener("deviceready", onDeviceReady, false);
 });
 
+function getRecipe(id) {
+	$.mobile.showPageLoadingMsg();
+	
+	var url = 'http://local.figleafbetty.com/recipe/' + id;
+	alert(url);
+	$.getJSON(url, function(data) {
+		alert(data);
+		var title = data.title;
+		var body = data.body;
+		$('#recipe_title').html(title);
+		$('#recipe_body').html(body);
+		$.mobile.changePage($("#recipePage"));
+		$.mobile.hidePageLoadingMsg();
+	});
+}
+
 $('#searchPage').live('pageinit', function(event) {
 	$('#searchButton').click(function() {
 		//$.getJSON('http://api.alternativeto.net/software/'
@@ -26,7 +42,7 @@ $('#searchPage').live('pageinit', function(event) {
 				var list = $('#list');
 				list.html("");
 				//$.each(items, function(key, val) {
-				list.append($(document.createElement('li')).attr('data-theme', 'c').html('<a href="#recipePage">Kale Salad</a>'));
+				list.append($(document.createElement('li')).attr('data-theme', 'c').html('<a onclick="getRecipe(1)">Kale Salad</a>'));
 				list.append($(document.createElement('li')).attr('data-theme', 'c').html('<a href="#recipePage">Red Kale Salad</a>'));
 				list.append($(document.createElement('li')).attr('data-theme', 'c').html('<a href="#recipePage">Kale and White Bean Soup</a>'));
 				//});
