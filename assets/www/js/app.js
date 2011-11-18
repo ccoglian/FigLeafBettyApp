@@ -30,6 +30,14 @@ function getParameterByName(name, inputstring) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
+function errorMessageToast(msg) {
+	$("<div id='notification' class='ui-loader ui-overlay-shadow ui-body-e ui-corner-all'><h1>"+msg+"</h1></div>")
+		.css({"display": "block", "opacity": 0.96, "top": $(window).scrollTop() + 100})
+		.appendTo($.mobile.pageContainer)
+		.delay(800) 
+		.fadeOut(800, function() { $(this).remove(); });
+}
+
 // load a recipe in JSON format from the remote web server
 function loadRecipe(id) {
 	$.mobile.showPageLoadingMsg();
@@ -67,12 +75,33 @@ $('div[data-url*="/recipe.html?id"]').live("pageinit", function() {
 
 $('#searchPage').live('pageinit', function(event) {
 	$('#searchButton').click(function() {
-		var list = $('#list');
-		list.html("");
-		list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe4' data-url='?id=4' href='javascript:void(0);'>Kale and White Bean Soup</a>"));
-		list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe2' data-url='?id=2' href='javascript:void(0);'>Red Kale Salad</a>"));
-		list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe1' data-url='?id=1' href='javascript:void(0);'>Kale Salad</a>"));
-		list.listview("destroy").listview();
+		var key = $("#searchBox").val();
+		
+		if (key == "") return;
+		
+		$.mobile.showPageLoadingMsg();
+		
+	//	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
+		var url = 'http://local.figleafbetty.com/search/' + key;
+		$.getJSON(url, function(data) {
+			if (data.length == 0) {
+				errorMessageToast('No results found');
+			} else {
+				var list = $('#list');
+				
+				list.html("");
+				$.each(data, function(key, val) {
+					var id = val.id;
+					var title = val.title;
+					
+					list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe" + id + "' data-url='?id=" + id + "' href='javascript:void(0);'>" + title + "</a>"));
+				});
+				
+				list.listview("destroy").listview();
+			}
+			
+			$.mobile.hidePageLoadingMsg();
+		});
 	});
 });
 
