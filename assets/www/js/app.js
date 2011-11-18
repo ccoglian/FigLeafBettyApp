@@ -17,36 +17,62 @@ $('#indexPage').live('pageinit', function(event) {
 	document.addEventListener("deviceready", onDeviceReady, false);
 });
 
-function getRecipe(id) {
+function getParameterByName(name, inputstring) {
+    var ips;
+    
+    if (inputstring.length == 0)
+        ips = window.location;
+    else
+        ips = inputstring;
+    
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(ips);
+    
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+// load a recipe in JSON format from the remote web server
+function loadRecipe(id) {
 	$.mobile.showPageLoadingMsg();
 	
+//	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
 	var url = 'http://local.figleafbetty.com/recipe/' + id;
-	alert(url);
 	$.getJSON(url, function(data) {
-		alert(data);
 		var title = data.title;
 		var body = data.body;
+		
 		$('#recipe_title').html(title);
 		$('#recipe_body').html(body);
-		$.mobile.changePage($("#recipePage"));
 		$.mobile.hidePageLoadingMsg();
 	});
 }
 
+// make the search results take you to the specific recipe page
+$('div[id="searchPage"] ul[data-role="listview"] a').live("click", function() {
+	var dataurl = $(this).attr("data-url");
+	if (dataurl != null) {
+		var id = getParameterByName("id", dataurl);
+		var opts = {'data-url': "/recipe.html?id=" + id};
+		
+		$.mobile.changePage("/recipe.html?id=" + id, opts); // go to the data url of the link
+	}
+});
+
+//load recipe for selected id
+$('div[data-url*="/recipe.html?id"]').live("pageinit", function() {
+	var dataurl = $(this).attr("data-url");
+	var id = getParameterByName("id", dataurl);
+	
+	loadRecipe(id); // once the page is loaded, go load the recipe content and set it into the page
+});
+
 $('#searchPage').live('pageinit', function(event) {
 	$('#searchButton').click(function() {
-		//$.getJSON('http://api.alternativeto.net/software/'
-		//		+$('#searchBox').val()+'/?count=15', 
-		//	function(data) {
-		//		var items = data.Items;
-				var list = $('#list');
-				list.html("");
-				//$.each(items, function(key, val) {
-				list.append($(document.createElement('li')).attr('data-theme', 'c').html('<a onclick="getRecipe(1)">Kale Salad</a>'));
-				list.append($(document.createElement('li')).attr('data-theme', 'c').html('<a href="#recipePage">Red Kale Salad</a>'));
-				list.append($(document.createElement('li')).attr('data-theme', 'c').html('<a href="#recipePage">Kale and White Bean Soup</a>'));
-				//});
-				list.listview("destroy").listview();
+		var list = $('#list');
+		list.html("");
+		list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe4' data-url='?id=4' href='javascript:void(0);'>Kale and White Bean Soup</a>"));
+		list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe2' data-url='?id=2' href='javascript:void(0);'>Red Kale Salad</a>"));
+		list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe1' data-url='?id=1' href='javascript:void(0);'>Kale Salad</a>"));
+		list.listview("destroy").listview();
 	});
 });
 
