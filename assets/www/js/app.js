@@ -47,29 +47,73 @@ function loadRecipe(id) {
 	$.getJSON(url, function(data) {
 		var recipe = data.recipe;
 		var title = recipe.title;
-		var image_filename = recipe.image_filename;
+		var image_url = recipe.image_url;
 		var description = recipe.description;
 		var recipe_items = data.recipe_items;
 		var instructions = recipe.instructions;
-		var instruction_list = instructions.split(/\n/);
+		var instruction_list = $.trim(instructions).split(/\n+/);
 		var serves = recipe.serves;
+		var recipe_reminders = data.recipe_reminders;
 		
 		$('#recipe_title').html(title);
-		$('#recipe_description').html('<img alt="' + title + '" src="' + image_filename + '" width="200" style="float:left; padding-right: 15px;">' + description);
+		$('#recipe_description').html('<img alt="' + title + '" src="' + image_url
+				+ '" style="display: block; margin-left: auto; margin-right: auto; width=\'300\'"><br/>' + description);
 		$.each(recipe_items, function(key, item) {
 			var quantity = toFraction(item.quantity);
 			var unit_name = item.quantity <= 1 ? item.unit.unit_name : item.unit.unit_name_plural;
 			var item_name = item.item_name;
 			var comments = hidenull(item.comments);
 			
-			$('#recipe_items').append('<tr><td style="white-space: nowrap; vertical-align: top"><strong>'
-					+ quantity + " " + unit_name + " " + item_name + '</td><td>' + comments + '</td></tr>');
+			$('#recipe_items').append('<tr><td><strong>'
+					+ quantity + " " + unit_name + " " + item_name + '</strong> ' + comments + '</td></tr>');
 		});
 		$.each(instruction_list, function(key, item) {
-			$('#recipe_instructions').append('<li>' + item + '</li>');
+			if ($.trim(item) != "")
+				$('#recipe_instructions').append('<li>' + item + '</li>');
 		});
 		$('#recipe_serves').html(serves);
+		
+		// create makeit page
+		var now = new Date();
+		var earliest_date = now;
+		var i = 1;
+		
+		$.each(recipe_reminders, function(key, item) {
+			var description = item.description;
+			var hours_ahead = item.hours_ahead;
+			var reminder_time = '';
+			
+			earliest_date = new Date(Math.max(earliest_date.getTime(), now.getTime() + (1000 * 60 * 60 * hours_ahead)));
+			
+			$('#recipe_reminders').append('<tr><td' + (i == 1 ? ' style="padding-top: 20px;"' : '') + '><label for="date' + i + '" style="display: inline;">'
+					+ description + '</label><br/><input type="text" name="date' + i + '" id="date' + i + '" class="mobiscroll" hours_ahead="' + hours_ahead + '" value="'
+					+ reminder_time + '" /></td></tr>');
+			i++;
+		});
+		
+		// round up to nearest 7pm
+		earliest_date.setHours(19);
+		earliest_date.setMinutes(0);
+		earliest_date.setSeconds(0);
+		earliest_date.setMilliseconds(0);
+		earliest_date = $.scroller.formatDate('D M d, yy h:ii A', earliest_date);
+		
+		$('#makeit_when').html("I'm going to make my " + title + " on");
+		$('#date0_cell').append('<input onchange="updateReminderTimes();" type="text" name="date0" id="date0" class="mobiscroll" style="min-width: 200px" value="' + earliest_date + '" />');
+		
+		updateReminderTimes();
 		$.mobile.hidePageLoadingMsg();
+	});
+}
+
+function updateReminderTimes() {
+	var makeit = new Date($('#date0').val());
+	
+	$('input[hours_ahead]').each(function(input) {
+		var hours_ahead = $(this).attr('hours_ahead');
+		var reminder_time = new Date(makeit.getTime() - (1000 * 60 * 60 * hours_ahead));
+		
+		$(this).val($.scroller.formatDate('D M d, yy h:ii A', reminder_time));
 	});
 }
 
@@ -90,6 +134,10 @@ $('div[data-url*="/recipe.html?id"]').live("pageinit", function() {
 	var id = getParameterByName("id", dataurl);
 	
 	loadRecipe(id); // once the page is loaded, go load the recipe content and set it into the page
+
+	$('#setreminders').click(function() {
+		window.history.go(-1);
+	});
 });
 
 $('#searchPage').live('pageinit', function(event) {
@@ -124,18 +172,14 @@ $('#searchPage').live('pageinit', function(event) {
 	});
 });
 
-$('#makeitPage').live('pageinit', function(event) {
+$('#makeitPage').live('pageshow', function(event) {
 	var currYear = (new Date()).getFullYear();
 	var datePickerOptions = { preset: 'datetime', theme: 'ios', mode: 'scroller',
 		setText: 'Done', startYear: currYear, endYear: currYear + 1, hourText: 'Hour', minuteText: 'Minute',
 		dateFormat: 'D M d, yy', timeFormat: 'h:ii A' }; 
-	$('#date0').scroller(datePickerOptions);
-    $('#date1').scroller(datePickerOptions);
-    $('#date2').scroller(datePickerOptions);
-    $('#date3').scroller(datePickerOptions);
-	$('#setreminders').click(function() {
-		window.history.go(-1);
-	});
+
+	// all inputs containing the class mobiscroll should get set up as datepickers
+	$('input[class~="mobiscroll"]').scroller(datePickerOptions);
 });
 
 function reachableCallback(reachability) {
