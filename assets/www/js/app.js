@@ -45,11 +45,30 @@ function loadRecipe(id) {
 //	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
 	var url = 'http://local.figleafbetty.com/recipe/' + id;
 	$.getJSON(url, function(data) {
-		var title = data.title;
-		var body = data.body;
+		var recipe = data.recipe;
+		var title = recipe.title;
+		var image_filename = recipe.image_filename;
+		var description = recipe.description;
+		var recipe_items = data.recipe_items;
+		var instructions = recipe.instructions;
+		var instruction_list = instructions.split(/\n/);
+		var serves = recipe.serves;
 		
 		$('#recipe_title').html(title);
-		$('#recipe_body').html(body);
+		$('#recipe_description').html('<img alt="' + title + '" src="' + image_filename + '" width="200" style="float:left; padding-right: 15px;">' + description);
+		$.each(recipe_items, function(key, item) {
+			var quantity = toFraction(item.quantity);
+			var unit_name = item.quantity <= 1 ? item.unit.unit_name : item.unit.unit_name_plural;
+			var item_name = item.item_name;
+			var comments = hidenull(item.comments);
+			
+			$('#recipe_items').append('<tr><td style="white-space: nowrap; vertical-align: top"><strong>'
+					+ quantity + " " + unit_name + " " + item_name + '</td><td>' + comments + '</td></tr>');
+		});
+		$.each(instruction_list, function(key, item) {
+			$('#recipe_instructions').append('<li>' + item + '</li>');
+		});
+		$('#recipe_serves').html(serves);
 		$.mobile.hidePageLoadingMsg();
 	});
 }
@@ -132,4 +151,29 @@ function reachableCallback(reachability) {
 // PhoneGap is loaded and it is now safe to make calls PhoneGap methods
 function onDeviceReady() {
 	navigator.network.isReachable('phonegap.com', reachableCallback);
+}
+
+function toFraction(decimal) {
+	var i;
+	var epsilon = .00001;
+	var MaxDen = 16;
+	
+	if (decimal == 0) {
+		return 0;
+	}
+	
+	for (i = 1; i <= MaxDen; i++) {
+		if (Math.abs(Math.round(i * decimal) - (i * decimal)) < epsilon) {
+			var whole = Math.floor(decimal);
+			var frac = Math.round((decimal - whole) * i) + "/" + i;
+			
+			return $.trim((whole == 0 ? "" : whole + " ") + (decimal - whole == 0 ? "" : frac));
+		}
+	}
+	
+	return decimal;
+}
+
+function hidenull(str) {
+	return str == null ? "" : str;
 }
