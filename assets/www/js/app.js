@@ -3,45 +3,68 @@ $('#indexPage').live('pageinit', function(event) {
 		window.location = "./search.html";	
 	});
 	
-	//					$.getJSON('http://api.alternativeto.net/software/'
-	//							+$('#searchBox').val()+'/?count=15', 
-	//						function(data) {
-	//							var items = data.Items;
-	//							var list = $('#list');
-	//							list.html("");
-	//							$.each(items, function(key, val) {
-	//								list.append($(document.createElement('li')).html(val.Name));
-	//							});
-	//							list.listview("destroy").listview()
-	//						});
 	document.addEventListener("deviceready", onDeviceReady, false);
 });
 
-function getParameterByName(name, inputstring) {
-    var ips;
-    
-    if (inputstring.length == 0)
-        ips = window.location;
-    else
-        ips = inputstring;
-    
-    var match = RegExp('[?&]' + name + '=([^&]*)').exec(ips);
-    
-    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
-}
+$('#searchPage').live('pageinit', function(event) {
+	$('#searchButton').click(function() {
+		var key = $("#searchBox").val();
+		
+		if (key == "") return;
+		
+		$.mobile.showPageLoadingMsg();
+		
+	//	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
+		var url = 'http://local.figleafbetty.com/search/' + key;
+		$.getJSON(url, function(data) {
+			if (data.length == 0) {
+				errorMessageToast('No results found');
+			} else {
+				var list = $('#list');
+				
+				list.html("");
+				$.each(data, function(key, val) {
+					var id = val.id;
+					var title = val.title;
+					
+					list.append($(document.createElement('li')).attr('data-theme', 'c').html(
+//							"<a data-identity='recipe" + id + "' data-url='?id=" + id + "' href='javascript:void(0);'>" + title + "</a>"));
+							"<a data-identity='recipe" + id + "' "
+							+ "data-url='/recipe.html?id=" + id + "' "
+							+ "href='/recipe.html?id=" + id + "'"
+//							+ "data-ajax='false' "
+							+ ">" + title + "</a>"));
+				});
+				
+				list.listview("destroy").listview();
+			}
+			
+			$.mobile.hidePageLoadingMsg();
+		});
+	});
+});
 
-function errorMessageToast(msg) {
-	$("<div id='notification' class='ui-loader ui-overlay-shadow ui-body-e ui-corner-all'><h1>"+msg+"</h1></div>")
-		.css({"display": "block", "opacity": 0.96, "top": $(window).scrollTop() + 100})
-		.appendTo($.mobile.pageContainer)
-		.delay(800) 
-		.fadeOut(800, function() { $(this).remove(); });
-}
+//load recipe for selected id
+$('div[data-url*="/recipe.html?id"]').live("pageinit", function() {
+	var dataurl = $(this).attr("data-url");
+	var id = getParameterByName("id", dataurl);
+	
+	loadRecipe(id); // once the page is loaded, go load the recipe content and set it into the page
+
+	$('#setreminders').click(function() {
+		window.history.go(-1);
+	});
+});
 
 // load a recipe in JSON format from the remote web server
 function loadRecipe(id) {
 	$.mobile.showPageLoadingMsg();
 	
+	// this would just be another page in the recipe.html page but then we can't load 
+	// recipe.html using ajax and the nice transitions so we pre-load it here and cache
+	// it in the DOM
+	$.mobile.loadPage('/makeit.html', {showLoadMsg: false});
+		
 //	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
 	var url = 'http://local.figleafbetty.com/recipe/' + id;
 	$.getJSON(url, function(data) {
@@ -78,6 +101,13 @@ function loadRecipe(id) {
 		var earliest_date = now;
 		var i = 1;
 		
+		$('#recipe_reminders').html(
+				'<tr>'
+		  			+ '<td style="border-bottom: solid 2px #060; padding-bottom: 20px;" id="date0_cell">'
+		  				+ '<label for="date0" id="makeit_when" style="display: inline"></label><br/>'
+	  				+ '</td>'
+               	+ '</tr>');
+		
 		$.each(recipe_reminders, function(key, item) {
 			var description = item.description;
 			var hours_ahead = item.hours_ahead;
@@ -85,9 +115,11 @@ function loadRecipe(id) {
 			
 			earliest_date = new Date(Math.max(earliest_date.getTime(), now.getTime() + (1000 * 60 * 60 * hours_ahead)));
 			
-			$('#recipe_reminders').append('<tr><td' + (i == 1 ? ' style="padding-top: 20px;"' : '') + '><label for="date' + i + '" style="display: inline;">'
-					+ description + '</label><br/><input type="text" name="date' + i + '" id="date' + i + '" class="mobiscroll" hours_ahead="' + hours_ahead + '" value="'
-					+ reminder_time + '" /></td></tr>');
+			$('#recipe_reminders').append('<tr><td' + (i == 1 ? ' style="padding-top: 20px;"' : '') + '>'
+					+ '<label for="date' + i + '" style="display: inline;">' + description + '</label><br/>'
+					+ '<input type="text" name="date' + i + '" id="date' + i + '" class="mobiscroll" '
+					+ 'hours_ahead="' + hours_ahead + '" value="' + reminder_time + '" />'
+					+ '</td></tr>');
 			i++;
 		});
 		
@@ -101,10 +133,23 @@ function loadRecipe(id) {
 		$('#makeit_when').html("I'm going to make my " + title + " on");
 		$('#date0_cell').append('<input onchange="updateReminderTimes();" type="text" name="date0" id="date0" class="mobiscroll" style="min-width: 200px" value="' + earliest_date + '" />');
 		
+		// add jQuery Mobile styling to dynamically inserted content
+		$('#makeitPage').trigger('create');
+		
 		updateReminderTimes();
 		$.mobile.hidePageLoadingMsg();
 	});
 }
+
+$('#makeitPage').live('pageshow', function(event) {
+	var currYear = (new Date()).getFullYear();
+	var datePickerOptions = { preset: 'datetime', theme: 'ios', mode: 'scroller',
+		setText: 'Done', startYear: currYear, endYear: currYear + 1, hourText: 'Hour', minuteText: 'Minute',
+		dateFormat: 'D M d, yy', timeFormat: 'h:ii A' }; 
+
+	// all inputs containing the class mobiscroll should get set up as datepickers
+	$('input[class~="mobiscroll"]').scroller(datePickerOptions);
+});
 
 function updateReminderTimes() {
 	var makeit = new Date($('#date0').val());
@@ -116,71 +161,6 @@ function updateReminderTimes() {
 		$(this).val($.scroller.formatDate('D M d, yy h:ii A', reminder_time));
 	});
 }
-
-// make the search results take you to the specific recipe page
-$('div[id="searchPage"] ul[data-role="listview"] a').live("click", function() {
-	var dataurl = $(this).attr("data-url");
-	if (dataurl != null) {
-		var id = getParameterByName("id", dataurl);
-		var opts = {'data-url': "/recipe.html?id=" + id};
-		
-		$.mobile.changePage("/recipe.html?id=" + id, opts); // go to the data url of the link
-	}
-});
-
-//load recipe for selected id
-$('div[data-url*="/recipe.html?id"]').live("pageinit", function() {
-	var dataurl = $(this).attr("data-url");
-	var id = getParameterByName("id", dataurl);
-	
-	loadRecipe(id); // once the page is loaded, go load the recipe content and set it into the page
-
-	$('#setreminders').click(function() {
-		window.history.go(-1);
-	});
-});
-
-$('#searchPage').live('pageinit', function(event) {
-	$('#searchButton').click(function() {
-		var key = $("#searchBox").val();
-		
-		if (key == "") return;
-		
-		$.mobile.showPageLoadingMsg();
-		
-	//	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
-		var url = 'http://local.figleafbetty.com/search/' + key;
-		$.getJSON(url, function(data) {
-			if (data.length == 0) {
-				errorMessageToast('No results found');
-			} else {
-				var list = $('#list');
-				
-				list.html("");
-				$.each(data, function(key, val) {
-					var id = val.id;
-					var title = val.title;
-					
-					list.append($(document.createElement('li')).attr('data-theme', 'c').html("<a data-identity='recipe" + id + "' data-url='?id=" + id + "' href='javascript:void(0);'>" + title + "</a>"));
-				});
-				
-				list.listview("destroy").listview();
-			}
-			
-			$.mobile.hidePageLoadingMsg();
-		});
-	});
-});
-
-$('#makeitPage').live('pageshow', function(event) {
-	var currYear = (new Date()).getFullYear();
-	var datePickerOptions = { preset: 'datetime', theme: 'ios', mode: 'scroller',
-		setText: 'Done', startYear: currYear, endYear: currYear + 1, hourText: 'Hour', minuteText: 'Minute',
-		dateFormat: 'D M d, yy', timeFormat: 'h:ii A' }; 
-
-	// all inputs containing the class mobiscroll should get set up as datepickers
-	$('input[class~="mobiscroll"]').scroller(datePickerOptions);
-});
 
 function reachableCallback(reachability) {
 	// There is no consistency on the format of reachability
@@ -220,4 +200,25 @@ function toFraction(decimal) {
 
 function hidenull(str) {
 	return str == null ? "" : str;
+}
+
+function getParameterByName(name, inputstring) {
+    var ips;
+    
+    if (inputstring.length == 0)
+        ips = window.location;
+    else
+        ips = inputstring;
+    
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(ips);
+    
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function errorMessageToast(msg) {
+	$("<div id='notification' class='ui-loader ui-overlay-shadow ui-body-e ui-corner-all'><h1>"+msg+"</h1></div>")
+		.css({"display": "block", "opacity": 0.96, "top": $(window).scrollTop() + 100})
+		.appendTo($.mobile.pageContainer)
+		.delay(800) 
+		.fadeOut(800, function() { $(this).remove(); });
 }
