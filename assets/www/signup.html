@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
-        <title>Login | Fig Leaf Betty</title>
+        <title>Sign Up! | Fig Leaf Betty</title>
 
         <link href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css" />
         <link href="css/themes/mychlorophyll.css" rel="stylesheet" type="text/css" />
@@ -23,18 +23,24 @@
 	</head>
 
     <body>
-		<div data-role="page" id="indexPage" data-theme="f">
+    	<div data-role="page" id="signupPage" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
-		    	<h1>Login</h1>
+		    	<h1>Sign Up!</h1>
 		  	</div>
 		  	<div data-role="content" data-theme="f">
-				<p>
-					Welcome to Fig Leaf Betty's Mobile Recipe Helper! Please log in
-					or sign up to search recipes, set reminders and share what you're doing
-					with friends!
-				</p>
-				<form id="loginForm">
+		  		<div id="signupErrors"></div>
+		  		<form id="signupForm">
 					<table>
+	                    <tr>
+	                        <td><label for="first_name">First</label></td>
+	                        <td><input type="text" id="first_name" name="first_name" /></td>
+	                    </tr>
+	                    <tr><td></td><td id="first_name_status_box"></td></tr>
+	                    <tr>
+	                        <td><label for="last_name">Last</label></td>
+	                        <td><input type="text" id="last_name" name="last_name" /></td>
+	                    </tr>
+	                    <tr><td></td><td id="last_name_status_box"></td></tr>
 	                    <tr>
 	                        <td><label for="email">Email</label></td>
 	                        <td><input type="email" id="email" name="email" /></td>
@@ -44,12 +50,16 @@
 	                        <td><label for="password">Password</label></td>
 	                        <td><input type="password" id="password" name="password" /></td>
 	                    </tr>
+	                    <tr><td></td><td id="password_status_box"></td></tr>
+	                    <tr>
+	                        <td><label for="confirm_password">Confirm Password</label></td>
+	                        <td><input type="password" id="confirm_password" name="confirm_password" /></td>
+	                    </tr>
 	                </table>
 	                <p>
-	                    <button type="submit" id="login">Login</button>
+	                    <button type="submit" id="signupButton">Sign Up!</button>
 	                </p>
                 </form>
-	            New user? <a href="signup.html" data-role="button">Sign up!</a>
 		    </div>
 		</div>
 	</body>

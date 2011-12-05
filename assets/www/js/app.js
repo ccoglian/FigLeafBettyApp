@@ -1,21 +1,81 @@
+function getRemoteBaseURL() {
+	//return 'http://10.0.2.2'; // for testing on the emulator
+	return 'http://local.figleafbetty.com';
+}
+
 $('#indexPage').live('pageinit', function(event) {
-	$('#login').click(function() {
-		window.location = "./search.html";	
+	$('#login').click(function(e) {
+		e.preventDefault();
+		
+		var url = getRemoteBaseURL() + '/login';
+		
+		$.mobile.showPageLoadingMsg();
+		
+		$.post(url, $('#loginForm').serialize(), function(data) {
+			var success = data.success;
+			
+			$.mobile.hidePageLoadingMsg();
+			
+			if (success) {
+				$.cookie('email', $('#email').val());
+				window.location = './search.html';
+			} else {
+				$('td[id$="_status_box"]').html(''); // ends with
+                $.each(data.errors, function(key, value) {
+                    $('#' + key + '_status_box').html(getStatusBox($('label[for=' + key + ']').text() + ':', value, 'error'));
+                });
+			}
+		});
+	});
+	
+	document.addEventListener("deviceready", onDeviceReady, false);
+	
+	var loggedIn = $.cookie('email');
+	if (loggedIn != null && loggedIn.length > 0) {
+		window.location = './search.html';
+	}
+});
+
+$('#signupPage').live('pageinit', function(event) {
+	$('#signupButton').click(function(e) {
+		e.preventDefault();
+		
+		var url = getRemoteBaseURL() + '/signup';
+		
+		$.mobile.showPageLoadingMsg();
+		
+		$.post(url, $('#signupForm').serialize(), function(data) {
+			var success = data.success;
+			
+			$.mobile.hidePageLoadingMsg();
+			
+			if (success) {
+				errorMessageToast('Thanks!');
+				// TODO Set Cookie
+				setTimeout("window.location='./search.html'", 1000);
+			} else {
+				$('td[id$="_status_box"]').html(''); // ends with
+                $.each(data.errors, function(key, value) {
+                    $('#' + key + '_status_box').html(getStatusBox($('label[for=' + key + ']').text() + ':', value, 'error'));
+                });
+			}
+		});
 	});
 	
 	document.addEventListener("deviceready", onDeviceReady, false);
 });
 
 $('#searchPage').live('pageinit', function(event) {
-	$('#searchButton').click(function() {
+	$('#searchButton').click(function(e) {
+		e.preventDefault();
+		
 		var key = $("#searchBox").val();
 		
 		if (key == "") return;
 		
 		$.mobile.showPageLoadingMsg();
 		
-	//	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
-		var url = 'http://local.figleafbetty.com/search/' + key;
+		var url = getRemoteBaseURL() + '/search/' + key;
 		$.getJSON(url, function(data) {
 			if (data.length == 0) {
 				errorMessageToast('No results found');
@@ -28,11 +88,9 @@ $('#searchPage').live('pageinit', function(event) {
 					var title = val.title;
 					
 					list.append($(document.createElement('li')).attr('data-theme', 'c').html(
-//							"<a data-identity='recipe" + id + "' data-url='?id=" + id + "' href='javascript:void(0);'>" + title + "</a>"));
 							"<a data-identity='recipe" + id + "' "
 							+ "data-url='/recipe.html?id=" + id + "' "
 							+ "href='/recipe.html?id=" + id + "'"
-//							+ "data-ajax='false' "
 							+ ">" + title + "</a>"));
 				});
 				
@@ -41,6 +99,13 @@ $('#searchPage').live('pageinit', function(event) {
 			
 			$.mobile.hidePageLoadingMsg();
 		});
+	});
+});
+
+$('#settingsPage').live('pageinit', function(event) {
+	$('#logoutButton').click(function() {
+		$.cookie('email', '');
+		window.location = '/index.html';
 	});
 });
 
@@ -64,9 +129,8 @@ function loadRecipe(id) {
 	// recipe.html using ajax and the nice transitions so we pre-load it here and cache
 	// it in the DOM
 	$.mobile.loadPage('/makeit.html', {showLoadMsg: false});
-		
-//	var url = 'http://10.0.2.2/recipe/' + id; // for testing on the emulator
-	var url = 'http://local.figleafbetty.com/recipe/' + id;
+	
+	var url = getRemoteBaseURL() + '/recipe/' + id;
 	$.getJSON(url, function(data) {
 		var recipe = data.recipe;
 		var title = recipe.title;
@@ -221,4 +285,21 @@ function errorMessageToast(msg) {
 		.appendTo($.mobile.pageContainer)
 		.delay(800) 
 		.fadeOut(800, function() { $(this).remove(); });
+}
+
+function getStatusBox(title, msg, type) {
+    var icon = 'ui-icon-info';
+    var ui_state = 'ui-state-highlight';
+
+    if (type == 'error') {
+        icon = 'ui-icon-alert';
+        ui_state = 'ui-state-error';
+    }
+
+    return "<div class='ui-body ui-body-e ui-widget' style='padding: 6px;'>"
+            + "<div class='" + ui_state + " ui-corner-all'>"
+                    + "<p style='margin: 0;'><span class='ui-icon " + icon + "' style='float: left; margin-right: .3em;'></span>"
+                    + "<strong>" + title + "</strong> " + msg + "</p>"
+            + "</div>"
+    + "</div>";
 }

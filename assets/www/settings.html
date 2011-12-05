@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
-        <title>Make it!</title>
+        <title>Settings | Fig Leaf Betty</title>
 
         <link href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css" />
         <link href="css/themes/mychlorophyll.css" rel="stylesheet" type="text/css" />
@@ -23,15 +23,11 @@
 	</head>
 
     <body>
-		<div data-role="page" id="makeitPage" data-dom-cache="true" data-theme="f">
-			<div data-role="header" data-position="fixed" data-theme="f">
-		    	<h1>Make it!</h1>
-		    	<a href="#recipePage" data-icon="arrow-l" data-iconpos="left" data-rel="back" data-theme="e">Recipe</a>
-		  	</div>
-		  	<div data-role="content" data-theme="f">
-		  		<table style="border-collapse: collapse" id="recipe_reminders">
-				</table>
-		  		<button type="submit" id="setreminders">Set reminders</button>
+		<div data-role="page" id="settingsPage">
+			<div data-role="content" data-theme="a">
+				<h3>Settings</h3>
+				<a data-role="button" id="logoutButton" data-theme="b">Logout</a>
+				<a href="search.html" data-role="button" data-rel="back" data-theme="a">Cancel</a>    
 			</div>
 		</div>
 	</body>
