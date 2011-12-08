@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
-        <title>Settings | Fig Leaf Betty</title>
+        <title>Home | Fig Leaf Betty</title>
 
         <link href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css" />
 	    <link href="css/mobiscroll.1.5.2.css" rel="stylesheet" type="text/css" />
@@ -21,11 +21,22 @@
 	</head>
 
     <body>
-		<div data-role="page" id="settingsPage">
-			<div data-role="content" data-theme="a">
-				<h3>Settings</h3>
-				<a data-role="button" id="logoutButton" data-theme="b">Logout</a>
-				<a href="search.html" data-role="button" data-rel="back" data-theme="a">Cancel</a>    
+		<div data-role="page" id="homePage" data-theme="f">
+			<div data-role="header" data-position="fixed" data-theme="f">
+		    	<h1>Home</h1>
+		    	<a data-theme="e" href="settings.html" data-rel="dialog" data-transition="slidedown" data-role="button" data-icon="gear" data-iconpos="notext" class="ui-btn-right"></a>
+		  	</div>
+		  	<div data-role="content" data-theme="f">
+				<p>
+					Welcome to Fig Leaf Betty's Mobile Recipe Helper! Search recipes,
+					set reminders, create shopping lists, and share what you're doing with friends!
+				</p>
+				<br/>
+				<ul data-role="listview" id="homeList">
+					<li><a href="search.html">Recipe Search</a></li>
+					<li><a href="makes.html">Recipes I'm Making</a></li>
+					<li><a href="shoppinglist.html">Shopping List</a></li>
+				</ul>
 			</div>
 		</div>
 	</body>
