@@ -303,6 +303,7 @@ function loadRecipe(id) {
 		
 		// add jQuery Mobile styling to dynamically inserted content
 		$('#makeitPage').trigger('create');
+		$('div[data-role=page]').trigger('updatelayout');
 		
 		$.mobile.hidePageLoadingMsg();
 	});
@@ -386,6 +387,16 @@ $('#makeitPage').live('pageshow', function(event) {
 		deleteScheduledMake(getLocalStorage('scheduled_make_id'));
 		window.history.go(-1);
 	});
+});
+
+$('#addToShoppingListButton').live('click', function() {
+	// TODO should just add recipe id to a list? Can't because we need to be
+	// able to delete items we already have in the pantry
+	// TODO how to handle multiple of the same recipe?
+});
+
+$('*').live('pageshow', function() {
+	$('div[data-role="footer"] .ui-btn-corner-all').removeClass('ui-btn-corner-all');
 });
 
 function updateReminderTimes() {
