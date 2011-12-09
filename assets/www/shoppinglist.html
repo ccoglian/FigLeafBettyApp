@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
-        <title>Search | Fig Leaf Betty</title>
+        <title>Shopping List | Fig Leaf Betty</title>
 
         <link href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css" />
 	    <link href="css/mobiscroll.1.5.2.css" rel="stylesheet" type="text/css" />
@@ -21,19 +21,17 @@
 	</head>
 
     <body>
-		<div data-role="page" id="searchPage" data-dom-cache="true" data-theme="f">
+		<div data-role="page" id="shoppinglistPage" data-url="/shoppinglist.html" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
-		    	<h1>Recipe Search</h1>
+		    	<h1>Shopping List</h1>
 		    	<a data-theme="e" href="/home.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>
 		  	</div>
 		  	<div data-role="content" data-theme="f">
-		  		<form>
-					<input type="text" data-type="search" name="search" id="searchBox" value="" /> 
-					<button type="submit" id="searchButton">Search</button>
-				</form>
-				<p style="padding-top: 1px">
-					<ul data-role="listview" id="searchResultsList"></ul>
-				</p> 
+		  		<h3>Things to buy</h3>
+			  	<div class="allrounded" id="thingsToBuy"></div>
+		  		<h3>Things I already have</h3>
+			  	<div class="allrounded linethrough" id="thingsIHave"></div>
+		  		<a data-role='button' data-theme="r" id="clearShoppingListButton">Clear List</a>
 			</div>
 		</div>
 	</body>

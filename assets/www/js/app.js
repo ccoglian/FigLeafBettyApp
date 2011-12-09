@@ -140,11 +140,11 @@ $('#makesPage').live('pageshow', function(event) {
 					prevDate = date;
 				}
 				
-				list.append($(document.createElement('li')).attr('data-theme', 'c').html(
+				list.append($(document.createElement('li')).attr(
+						{'data-theme': 'c', 'scheduled_make_id': scheduled_make_id}).html(
 						"<a data-identity='recipe" + id + "' "
 						+ "data-url='/recipe.html?id=" + id + "' "
 						+ "href='/recipe.html?id=" + id + "'"
-						+ "scheduled_make_id='" + scheduled_make_id + "' "
 						+ ">" + title
 						+ '<p class="ui-li-aside ui-li-desc">' + time + '</p>'
 						+ "</a>"));
@@ -157,15 +157,23 @@ $('#makesPage').live('pageshow', function(event) {
 	});
 });
 
-$('#makesPage li a').live('tap', function(event) {
+$('#makesPage .liDeleteButton').live('click', function(event) {
+	var li = $(this).closest('li');
+	var make_id = li.attr('scheduled_make_id');
+	
+	li.fadeOut();
+	deleteScheduledMake(make_id);
+});
+
+$('div[data-role=page]').live('tap', function(event) {
 	if ($('.liDeleteButton:visible').length > 0) {
 		$('.liDeleteButton').hide("slide", { direction: "right" }, 500);
 	}
 });
 
-$('#makesPage li a').live('swipeleft', function(event) {
-	var a = $(this);
-	a.css('overflow', 'hidden');
+$('.deletable li').live('swipeleft', function(event) {
+	var li = $(this);
+	li.css('overflow', 'hidden');
 	var deleteBtn = $('<a>Delete</a>').attr({
 		'class': 'liDeleteButton ui-btn-up-r',
 		'style': 'display: none'
@@ -173,19 +181,14 @@ $('#makesPage li a').live('swipeleft', function(event) {
 	
 	// remove all buttons first
 	$('.liDeleteButton').remove();
-	a.prepend(deleteBtn);
+	li.prepend(deleteBtn);
 	$('.liDeleteButton').show("slide", { direction: "right" }, 500);
-});
-
-$('.liDeleteButton').live('click', function(event) {
-	var make_id = $(this).parent().closest('a').attr('scheduled_make_id');
-	
-	$(this).parent().closest('li').fadeOut();
-	deleteScheduledMake(make_id);
+	$('.liDeleteButton').css('margin-top',
+			Math.floor((li.innerHeight() - $('.liDeleteButton').outerHeight()) / 2) + "px");
 });
 
 // just for testing
-$('#makesPage li a').live('mousedown', function(e) {
+$('.deletable li').live('mousedown', function(e) {
 	/* Right Mousebutton was clicked! */
     if (e.which === 3) {
     	if ($('.liDeleteButton:visible').length > 0) {
@@ -194,6 +197,69 @@ $('#makesPage li a').live('mousedown', function(e) {
     		$(this).trigger('swipeleft');
     	}
     }
+});
+
+$('#shoppinglistPage').live('pageshow', function(e) {
+	var url = getRemoteBaseURL() + "/shoppinglist/" + $.cookie('email');
+	
+	$.getJSON(url, function(data) {
+		logAnyErrors(data);
+		
+		if (data.success) {
+			var thingsToBuy = $('#thingsToBuy');
+			var thingsIHave = $('#thingsIHave');
+			
+			thingsToBuy.html('');
+			thingsIHave.html('');
+			
+			$.each(data.results, function(key, item) {
+				var active = parseInt(item.active);
+				var item_name = item.item_name;
+				var quantity = toFraction(item.quantity);
+				var unit_name = item.quantity <= 1 ? item.unit_name : item.unit_name_plural;
+				var list = active ? thingsToBuy : thingsIHave;
+				var checked = active ? ' ' : 'checked ';
+				var shopping_list_item_ids = item.shopping_list_item_ids;
+				var id = "checkbox-" + shopping_list_item_ids;
+				
+				list.append('<input type="checkbox" ' + 'name="' + id + '" ' + 'id="' + id + '" ' 
+						+ 'shopping_list_item_ids=' + shopping_list_item_ids + ' '
+						+ checked
+						+ 'class="custom">'
+						+ '<label for="' + id + '">' + item_name + ' (' + quantity + ' ' + unit_name + ')</label>');
+			});
+			
+			$('#shoppinglistPage').trigger('create');
+		}
+	});
+});
+
+$("#shoppinglistPage input[type=checkbox]").live('change', function(e) {
+	var checkbox = $(this)
+	var label = checkbox.next();
+	var div = checkbox.parent();
+	var shopping_list_item_ids = checkbox.attr('shopping_list_item_ids');
+	
+	$.each(shopping_list_item_ids.split(','), function(key, id) {
+		var url = getRemoteBaseURL() + "/shoppinglist/toggleactive/" + id;
+		$.post(url, logAnyErrors);
+	});
+	
+	div.appendTo(checkbox.is(':checked') ? '#thingsIHave' : '#thingsToBuy');
+});
+
+$('#clearShoppingListButton').live('click', function(e) {
+	$.mobile.showPageLoadingMsg();
+	var url = getRemoteBaseURL() + "/shoppinglist/clear/" + $.cookie('email');
+	$.post(url, function(data) {
+		if (interactiveCallback(data)) {
+			var thingsToBuy = $('#thingsToBuy');
+			var thingsIHave = $('#thingsIHave');
+			
+			thingsToBuy.html('');
+			thingsIHave.html('');
+		}
+	});
 });
 
 //load recipe for selected id
@@ -303,7 +369,7 @@ function loadRecipe(id) {
 		
 		// add jQuery Mobile styling to dynamically inserted content
 		$('#makeitPage').trigger('create');
-		$('div[data-role=page]').trigger('updatelayout');
+		setTimeout("$('div[data-role=page]').trigger('updatelayout');", 300);
 		
 		$.mobile.hidePageLoadingMsg();
 	});
@@ -366,19 +432,7 @@ $('#makeitPage').live('pageshow', function(event) {
 		
 		var url = getRemoteBaseURL() + '/makeit';
 		$.post(url, postData, function(data) {
-			var success = data.success;
-			
-			$.mobile.hidePageLoadingMsg();
-			
-			if (success) {
-				errorMessageToast('Success!');
-			} else {
-				$.each(data.errors, function(key, value) {
-                    console.log(key + ": " + value);
-                });
-				errorMessageToast('Something went wrong. Sorry. :( ' + data.errors[0]);
-			}
-			
+			interactiveCallback(data);
 			setTimeout("window.history.go(-1);", 1000);
 		});
 	});
@@ -390,9 +444,9 @@ $('#makeitPage').live('pageshow', function(event) {
 });
 
 $('#addToShoppingListButton').live('click', function() {
-	// TODO should just add recipe id to a list? Can't because we need to be
-	// able to delete items we already have in the pantry
-	// TODO how to handle multiple of the same recipe?
+	$.mobile.showPageLoadingMsg();
+	var url = getRemoteBaseURL() + '/shoppinglist/add/' + getLocalStorage('recipe_id');
+	$.post(url, {email: $.cookie('email')}, interactiveCallback);
 });
 
 $('*').live('pageshow', function() {
@@ -521,6 +575,25 @@ function getStatusBox(title, msg, type) {
 
 function changeButtonText(selector, text) {
 	$(selector).prev('.ui-btn-inner').children('.ui-btn-text').html(text);
+}
+
+function logAnyErrors(data) {
+	if (!data.success) {
+		$.each(data.errors, function(key, value) { console.log(key + ": " + value); });
+	}
+}
+
+function interactiveCallback(data) {
+	$.mobile.hidePageLoadingMsg();
+	logAnyErrors(data);
+	
+	if (data.success) {
+		errorMessageToast('Success!');
+	} else {
+		errorMessageToast('Something went wrong. Sorry. :( ' + data.errors[0]);
+	}
+	
+	return data.success;
 }
 
 // load up our persistent storage
