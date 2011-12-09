@@ -27,11 +27,19 @@
 		    	<a data-theme="e" href="/home.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>
 		  	</div>
 		  	<div data-role="content" data-theme="f">
-		  		<h3>Things to buy</h3>
-			  	<div class="allrounded" id="thingsToBuy"></div>
-		  		<h3>Things I already have</h3>
+		  		<h3 style="margin-bottom: 5px;">Things to buy</h3>
+		  		<form>
+			  		<div>
+			  			<input id="extraItem" type="text" data-inline="true" style="display: inline; width: 60%"></input>
+			  			<button id="addExtraToShoppingListButton" type="submit" data-icon="plus" data-inline="true" style="display: inline">Add</button>
+		  			</div>
+	  			</form>
+	  			<div class="allrounded" id="thingsToBuy"></div>
+		  		<h3 style="margin-top: 30px;">Things I already have</h3>
 			  	<div class="allrounded linethrough" id="thingsIHave"></div>
-		  		<a data-role='button' data-theme="r" id="clearShoppingListButton">Clear List</a>
+		  		<a data-role='button' data-theme="r" id="clearShoppingListButton"
+		  			style="margin-top: 30px; margin-bottom: 20px;">Clear List</a>
+		  		<div id="shoppinglistNote"></div>
 			</div>
 		</div>
 	</body>

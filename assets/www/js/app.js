@@ -199,11 +199,20 @@ $('.deletable li').live('mousedown', function(e) {
     }
 });
 
+$('#shoppinglistPage').live('pageinit', function(e) {
+	$('#shoppinglistNote').html(getStatusBox('Note', 
+			'You can add entire ingredient lists from the individual recipe pages. You can also add other items directly here.', 'info'));
+});
+
 $('#shoppinglistPage').live('pageshow', function(e) {
+	$.mobile.showPageLoadingMsg();
+	
 	var url = getRemoteBaseURL() + "/shoppinglist/" + $.cookie('email');
 	
 	$.getJSON(url, function(data) {
 		logAnyErrors(data);
+		
+		$.mobile.hidePageLoadingMsg();
 		
 		if (data.success) {
 			var thingsToBuy = $('#thingsToBuy');
@@ -212,7 +221,22 @@ $('#shoppinglistPage').live('pageshow', function(e) {
 			thingsToBuy.html('');
 			thingsIHave.html('');
 			
-			$.each(data.results, function(key, item) {
+			$.each(data.results.extraShoppingListItems, function(key, item) {
+				var active = parseInt(item.active);
+				var item_name = item.item_name;
+				var list = active ? thingsToBuy : thingsIHave;
+				var checked = active ? ' ' : 'checked ';
+				var extra_shopping_list_item_id = item.extra_shopping_list_item_id;
+				var id = "checkbox-extra-" + extra_shopping_list_item_id;
+				
+				list.append('<input type="checkbox" ' + 'name="' + id + '" ' + 'id="' + id + '" ' 
+						+ 'extra_shopping_list_item_id=' + extra_shopping_list_item_id + ' '
+						+ checked
+						+ 'class="custom">'
+						+ '<label for="' + id + '">' + item_name + '</label>');
+			});
+			
+			$.each(data.results.shoppingListItems, function(key, item) {
 				var active = parseInt(item.active);
 				var item_name = item.item_name;
 				var quantity = toFraction(item.quantity);
@@ -239,9 +263,15 @@ $("#shoppinglistPage input[type=checkbox]").live('change', function(e) {
 	var label = checkbox.next();
 	var div = checkbox.parent();
 	var shopping_list_item_ids = checkbox.attr('shopping_list_item_ids');
+	var path = "/shoppinglist/toggleactive/";
+	
+	if (!shopping_list_item_ids || shopping_list_item_ids.length == 0) {
+		shopping_list_item_ids = checkbox.attr('extra_shopping_list_item_id');
+		path = "/shoppinglist/toggleactive/extra/";
+	}
 	
 	$.each(shopping_list_item_ids.split(','), function(key, id) {
-		var url = getRemoteBaseURL() + "/shoppinglist/toggleactive/" + id;
+		var url = getRemoteBaseURL() + path + id;
 		$.post(url, logAnyErrors);
 	});
 	
@@ -258,6 +288,31 @@ $('#clearShoppingListButton').live('click', function(e) {
 			
 			thingsToBuy.html('');
 			thingsIHave.html('');
+		}
+	});
+});
+
+$('#addExtraToShoppingListButton').live('click', function(e) {
+	e.preventDefault();
+	var item_name = $('#extraItem').val();
+	
+	if (!item_name || item_name.length == 0) return;
+	
+	var url = getRemoteBaseURL() + "/shoppinglist/addextra/";
+	$.post(url, {email: $.cookie('email'), 'item_name': item_name}, function(data) {
+		if (logAnyErrors(data)) {
+			var list = $('#thingsToBuy');
+			var extra_shopping_list_item_id = data.results[0].extra_shopping_list_item_id;
+			var id = "checkbox-extra-" + extra_shopping_list_item_id;
+			
+//			$('#thingsToBuy label[for^=checkbox-extra]').last().closest('div').after(
+			list.prepend(
+					'<input type="checkbox" ' + 'name="' + id + '" ' + 'id="' + id + '" ' 
+					+ 'extra_shopping_list_item_id=' + extra_shopping_list_item_id + ' '
+					+ 'class="custom">'
+					+ '<label for="' + id + '">' + item_name + '</label>');
+			$('#shoppinglistPage').trigger('create');
+			$('#extraItem').val('');
 		}
 	});
 });
@@ -559,14 +614,16 @@ function errorMessageToast(msg) {
 function getStatusBox(title, msg, type) {
     var icon = 'ui-icon-info';
     var ui_state = 'ui-state-highlight';
-
+    var theme = 'd';
+    
     if (type == 'error') {
         icon = 'ui-icon-alert';
         ui_state = 'ui-state-error';
+        theme = 'e';
     }
 
-    return "<div class='ui-body ui-body-e ui-widget' style='padding: 6px;'>"
-            + "<div class='" + ui_state + " ui-corner-all'>"
+    return "<div class='ui-body ui-body-" + theme + " ui-widget ui-corner-all' style='padding: 6px;'>"
+            + "<div class='" + ui_state + "'>"
                     + "<p style='margin: 0;'><span class='ui-icon " + icon + "' style='float: left; margin-right: .3em;'></span>"
                     + "<strong>" + title + "</strong> " + msg + "</p>"
             + "</div>"
@@ -581,6 +638,8 @@ function logAnyErrors(data) {
 	if (!data.success) {
 		$.each(data.errors, function(key, value) { console.log(key + ": " + value); });
 	}
+	
+	return data.success;
 }
 
 function interactiveCallback(data) {
