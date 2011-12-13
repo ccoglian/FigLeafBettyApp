@@ -40,6 +40,166 @@
 			    <a class="ui-block-a ui-btn-corner-none" data-role="button" id="addToShoppingListButton" data-icon="plus" data-iconpos="top" data-theme="a">Add To Shopping List</a>
 			    <a class="ui-block-b ui-btn-corner-none" data-role="button" href="/makeit.html" data-icon="check" data-iconpos="top" data-transition="slideup" data-theme="a">Make It!</a>
 		  	</div>
+		  	<script type="text/javascript">
+//load recipe for selected id
+$('div[data-url*="/recipe.html?id"]').die('pageinit').live('pageinit', function() {
+	var dataurl = $(this).attr("data-url");
+	var id = getParameterByName("id", dataurl);
+	
+	loadRecipe(id); // once the page is loaded, go load the recipe content and set it into the page
+});
+
+// load a recipe in JSON format from the remote web server
+function loadRecipe(id) {
+	$.mobile.showPageLoadingMsg();
+	
+	putLocalStorage('recipe_id', id);
+	
+	// this would just be another page in the recipe.html page but then we can't load 
+	// recipe.html using ajax and the nice transitions so we pre-load it here and cache
+	// it in the DOM
+	$.mobile.loadPage('/makeit.html', {showLoadMsg: false});
+	
+	var url = getRemoteBaseURL() + '/recipe/' + id;
+	$.getJSON(url, {user_id: getUserId()}, function(data) {
+		var recipe = data.recipe;
+		var title = recipe.title;
+		var image_url = recipe.image_url;
+		var description = recipe.description;
+		var recipe_items = data.recipe_items;
+		var instructions = recipe.instructions;
+		var instruction_list = $.trim(instructions).split(/\n+/);
+		var serves = recipe.serves;
+		var default_reminders = data.default_reminders;
+		var scheduled_make = data.scheduled_make;
+		
+		$('#recipe_title').html(title);
+		$('#recipe_description').html('<img alt="' + title + '" src="' + image_url
+				+ '" style="display: block; margin-left: auto; margin-right: auto; width=\'300\'"><br/>' + description);
+		$('#recipe_items').html('');
+		$.each(recipe_items, function(key, item) {
+			var quantity = toFraction(item.quantity);
+			var unit_name = item.quantity <= 1 ? item.unit.unit_name : item.unit.unit_name_plural;
+			var item_name = item.item_name;
+			var comments = hidenull(item.comments);
+			
+			$('#recipe_items').append('<tr><td><strong>'
+					+ quantity + " " + unit_name + " " + item_name + '</strong> ' + comments + '</td></tr>');
+		});
+		$('#recipe_instructions').html();
+		$.each(instruction_list, function(key, item) {
+			if ($.trim(item) != "")
+				$('#recipe_instructions').append('<li>' + item + '</li>');
+		});
+		$('#recipe_serves').html(serves);
+		
+		// create makeit page
+		var now = new Date();
+		var earliest_date = now;
+		var i = 1;
+		
+		$('#recipe_reminders').html(
+				'<tr><td id="currentMakeCell" style="padding: 10px 0 20px 0;"></td></tr>'
+				+ '<tr>'
+		  			+ '<td style="border-bottom: solid 2px #060; padding-bottom: 20px;" id="date0_cell">'
+		  				+ '<label for="date0" id="makeit_when" style="display: inline"></label><br/>'
+	  				+ '</td>'
+               	+ '</tr>');
+		
+		$.each(default_reminders, function(key, item) {
+			var recipe_reminder_id = item.recipe_reminder_id;
+			var description = item.description;
+			var hours_ahead = item.hours_ahead;
+			var reminder_time = '';
+			
+			earliest_date = new Date(Math.max(earliest_date.getTime(), now.getTime() + (1000 * 60 * 60 * hours_ahead)));
+			
+			$('#recipe_reminders').append('<tr><td' + (i == 1 ? ' style="padding-top: 20px;"' : '') + '>'
+					+ '<label for="date' + i + '" style="display: inline;">' + description + '</label><br/>'
+					+ '<input type="text" name="date' + i + '" id="date' + i + '" class="mobiscroll" '
+					+ 'hours_ahead="' + hours_ahead + '" recipe_reminder_id="' + recipe_reminder_id + '" ' 
+					+ 'value="' + reminder_time + '" />'
+					+ '</td></tr>');
+			i++;
+		});
+		
+		// round up to nearest 7pm
+		earliest_date.setHours(19);
+		earliest_date.setMinutes(0);
+		earliest_date.setSeconds(0);
+		earliest_date.setMilliseconds(0);
+		
+		earliest_date = $.scroller.formatDate('D M d, yy h:ii A', earliest_date);
+		
+		$('#makeit_when').html("I'm going to make my " + title + " on");
+		$('#date0_cell').append('<input onchange="updateReminderTimes();" type="text" name="date0" id="date0" class="mobiscroll" style="min-width: 200px" value="' + earliest_date + '" />');
+		
+		if (scheduled_make && scheduled_make.make) {
+			$('#date0').val($.scroller.formatDate('D M d, yy h:ii A', new Date(scheduled_make.make.local_time)));
+			$.each(scheduled_make.reminders, function(key, item) {
+				elem = $('input[recipe_reminder_id=' + item.recipe_reminder_id + ']');
+				elem.attr('scheduled_reminder_id', item.scheduled_reminder_id);
+				elem.val($.scroller.formatDate('D M d, yy h:ii A', new Date(item.local_time)));
+			});
+			
+			setScheduledMake(scheduled_make.make.scheduled_make_id, scheduled_make.make.local_time);
+		} else {
+			setScheduledMake();
+			updateReminderTimes();
+		}
+		
+		// add jQuery Mobile styling to dynamically inserted content
+		$('#makeitPage').trigger('create');
+		setTimeout("$('div[data-role=page]').trigger('updatelayout');", 1000);
+		
+		$.mobile.hidePageLoadingMsg();
+	});
+}
+
+function updateReminderTimes() {
+	var makeit = new Date($('#date0').val());
+	
+	$('input[hours_ahead]').each(function(input) {
+		var hours_ahead = $(this).attr('hours_ahead');
+		var reminder_time = new Date(makeit.getTime() - (1000 * 60 * 60 * hours_ahead));
+		
+		$(this).val($.scroller.formatDate('D M d, yy h:ii A', reminder_time));
+	});
+}
+
+function setScheduledMake(scheduled_make_id, local_time) {
+	if (scheduled_make_id) {
+		putLocalStorage('scheduled_make_id', scheduled_make_id);
+		updateCurrentMakeCell(local_time);
+		changeButtonText('#setremindersButton', 'Update Reminders');
+		$('#deleteMakeButton').css('display', '');
+	} else {
+		deleteLocalStorage('scheduled_make_id');
+		updateCurrentMakeCell();
+		changeButtonText('#setremindersButton', 'Set Reminders');
+		$('#deleteMakeButton').css('display', 'none');
+	}
+}
+
+function updateCurrentMakeCell(timeStr) {
+	var html = '';
+	
+	if (timeStr) {
+		var html = getStatusBox('Note',
+				"You are currently scheduled to make this on "
+				+ $.scroller.formatDate("DD MM d, yy 'at' h:ii A", new Date(timeStr))
+				+ ".", 'info');
+	}
+	
+	$('#currentMakeCell').html(html);
+}
+
+$('#addToShoppingListButton').die('click').live('click', function() {
+	$.mobile.showPageLoadingMsg();
+	var url = getRemoteBaseURL() + '/shoppinglist/add/' + getLocalStorage('recipe_id');
+	$.post(url, {user_id: getUserId()}, interactiveCallback);
+});
+		  	</script>
 		</div>
 	</body>
 </html>

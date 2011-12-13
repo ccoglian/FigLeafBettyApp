@@ -32,6 +32,61 @@
 		  		<button type="submit" id="setremindersButton">Set Reminders</button>
 		  		<a data-role='button' data-theme="r" id="deleteMakeButton">Delete</a>
 			</div>
+			<script type="text/javascript">
+$('#makeitPage').die('pageshow').live('pageshow', function(event) {
+	var currYear = (new Date()).getFullYear();
+	var datePickerOptions = { preset: 'datetime', theme: 'ios', mode: 'scroller',
+		setText: 'Done', startYear: currYear, endYear: currYear + 1, hourText: 'Hour', minuteText: 'Minute',
+		dateFormat: 'D M d, yy', timeFormat: 'h:ii A' }; 
+
+	// all inputs containing the class mobiscroll should get set up as datepickers
+	$('input[class~="mobiscroll"]').scroller(datePickerOptions);
+
+	// make sure only one instance of this click function is registered at a time
+	$('#setremindersButton').unbind('click').bind('click', function() {
+		$.mobile.showPageLoadingMsg();
+		
+		var postData = {user_id: getUserId()};
+		var make_time = $('#date0').val();
+		var reminders = [];
+		var scheduled_make_id = getLocalStorage('scheduled_make_id', 0);
+		
+		postData['scheduled_make_id'] = scheduled_make_id;
+		postData['recipe_id'] = getLocalStorage('recipe_id');
+		postData['local_time'] = make_time;
+		postData['server_time'] = new Date(make_time).toUTCString();
+		
+		$('input[id^=date]').each(function(input) {
+			var recipe_reminder_id = $(this).attr('recipe_reminder_id');
+			var scheduled_reminder_id = $(this).attr('scheduled_reminder_id');
+			var local_time = $(this).val();
+			
+			if (recipe_reminder_id >= 1) {
+				reminders[reminders.length] = {
+						recipe_reminder_id: recipe_reminder_id,
+						scheduled_make_id: scheduled_make_id,
+						scheduled_reminder_id: scheduled_reminder_id || 0,
+						local_time: local_time,
+						server_time: new Date(local_time).toUTCString()
+				};
+			}
+		});
+		
+		postData['reminders'] = reminders;
+		
+		var url = getRemoteBaseURL() + '/makeit';
+		$.post(url, postData, function(data) {
+			interactiveCallback(data);
+			setTimeout("window.history.go(-1);", 1000);
+		});
+	});
+	
+	$('#deleteMakeButton').unbind('click').bind('click', function() {
+		deleteScheduledMake(getLocalStorage('scheduled_make_id'));
+		window.history.go(-1);
+	});
+});
+			</script>
 		</div>
 	</body>
 </html>

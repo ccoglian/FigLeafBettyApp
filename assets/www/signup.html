@@ -24,6 +24,7 @@
     	<div data-role="page" id="signupPage" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
 		    	<h1>Sign Up!</h1>
+		    	<a data-theme="e" href="/index.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>
 		  	</div>
 		  	<div data-role="content" data-theme="f">
 		  		<div id="signupErrors"></div>
@@ -59,6 +60,27 @@
 	                </p>
                 </form>
 		    </div>
+		    <script type="text/javascript">
+$('#signupPage').die('pageinit').live('pageinit', function(event) {
+	$('#signupButton').unbind('click').bind('click', function(e) {
+		e.preventDefault();
+		$.mobile.showPageLoadingMsg();
+		
+		var url = getRemoteBaseURL() + '/signup';
+		$.post(url, $('#signupForm').serialize(), function(data) {
+			$.mobile.hidePageLoadingMsg();
+			
+			if (data.success) {
+				showMessageToast('Thanks!');
+				setUserId(data.results.user_id);
+				setTimeout("window.location='./home.html'", 1000);
+			} else {
+				showFormErrors(data.errors);
+			}
+		});
+	});
+});
+		    </script>
 		</div>
 	</body>
 </html>

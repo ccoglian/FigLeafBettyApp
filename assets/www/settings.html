@@ -27,6 +27,14 @@
 				<a data-role="button" id="logoutButton" data-theme="b">Logout</a>
 				<a href="search.html" data-role="button" data-rel="back" data-theme="a">Cancel</a>    
 			</div>
+			<script type="text/javascript">
+$('#settingsPage').die('pageinit').live('pageinit', function(event) {
+	$('#logoutButton').die('click').live('click', function(e) {
+		logOut();
+		window.location = '/index.html';
+	});
+});
+			</script>
 		</div>
 	</body>
 </html>

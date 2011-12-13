@@ -41,6 +41,125 @@
 		  			style="margin-top: 30px; margin-bottom: 20px;">Clear List</a>
 		  		<div id="shoppinglistNote"></div>
 			</div>
+			<script type="text/javascript">
+$('#shoppinglistPage').die('pageinit').live('pageinit', function(e) {
+	$('#shoppinglistNote').html(getStatusBox('Note', 
+			'You can add entire ingredient lists from the individual recipe pages. You can also add other items directly here.', 'info'));
+});
+
+$('#shoppinglistPage').die('pageshow').live('pageshow', function(e) {
+	$.mobile.showPageLoadingMsg();
+	
+	var url = getRemoteBaseURL() + "/shoppinglist/" + getUserId();
+	
+	$.getJSON(url, function(data) {
+		logAnyErrors(data);
+		
+		$.mobile.hidePageLoadingMsg();
+		
+		if (data.success) {
+			var thingsToBuy = $('#thingsToBuy');
+			var thingsIHave = $('#thingsIHave');
+			
+			thingsToBuy.html('');
+			thingsIHave.html('');
+			
+			$.each(data.results.extraShoppingListItems, function(key, item) {
+				var active = parseInt(item.active);
+				var item_name = item.item_name;
+				var list = active ? thingsToBuy : thingsIHave;
+				var checked = active ? ' ' : 'checked ';
+				var extra_shopping_list_item_id = item.extra_shopping_list_item_id;
+				var id = "checkbox-extra-" + extra_shopping_list_item_id;
+				
+				list.append('<input type="checkbox" ' + 'name="' + id + '" ' + 'id="' + id + '" ' 
+						+ 'extra_shopping_list_item_id=' + extra_shopping_list_item_id + ' '
+						+ checked
+						+ 'class="custom">'
+						+ '<label for="' + id + '">' + item_name + '</label>');
+			});
+			
+			$.each(data.results.shoppingListItems, function(key, item) {
+				var active = parseInt(item.active);
+				var item_name = item.item_name;
+				var quantity = toFraction(item.quantity);
+				var unit_name = item.quantity <= 1 ? item.unit_name : item.unit_name_plural;
+				var list = active ? thingsToBuy : thingsIHave;
+				var checked = active ? ' ' : 'checked ';
+				var shopping_list_item_ids = item.shopping_list_item_ids;
+				var id = "checkbox-" + shopping_list_item_ids;
+				
+				list.append('<input type="checkbox" ' + 'name="' + id + '" ' + 'id="' + id + '" ' 
+						+ 'shopping_list_item_ids=' + shopping_list_item_ids + ' '
+						+ checked
+						+ 'class="custom">'
+						+ '<label for="' + id + '">' + item_name + ' (' + quantity + ' ' + unit_name + ')</label>');
+			});
+			
+			$('#shoppinglistPage').trigger('create');
+		}
+	});
+});
+
+$("#shoppinglistPage input[type=checkbox]").die('change').live('change', function(e) {
+	var checkbox = $(this)
+	var label = checkbox.next();
+	var div = checkbox.parent();
+	var shopping_list_item_ids = checkbox.attr('shopping_list_item_ids');
+	var path = "/shoppinglist/toggleactive/";
+	
+	if (!shopping_list_item_ids || shopping_list_item_ids.length == 0) {
+		shopping_list_item_ids = checkbox.attr('extra_shopping_list_item_id');
+		path = "/shoppinglist/toggleactive/extra/";
+	}
+	
+	$.each(shopping_list_item_ids.split(','), function(key, id) {
+		var url = getRemoteBaseURL() + path + id;
+		$.post(url, logAnyErrors);
+	});
+	
+	div.appendTo(checkbox.is(':checked') ? '#thingsIHave' : '#thingsToBuy');
+});
+
+$('#clearShoppingListButton').die('click').live('click', function(e) {
+	$.mobile.showPageLoadingMsg();
+	var url = getRemoteBaseURL() + "/shoppinglist/clear/" + getUserId();
+	$.post(url, function(data) {
+		if (interactiveCallback(data)) {
+			var thingsToBuy = $('#thingsToBuy');
+			var thingsIHave = $('#thingsIHave');
+			
+			thingsToBuy.html('');
+			thingsIHave.html('');
+		}
+	});
+});
+
+$('#addExtraToShoppingListButton').live('click', function(e) {
+	e.preventDefault();
+	var item_name = $('#extraItem').val();
+	
+	if (!item_name || item_name.length == 0) return;
+	
+	var url = getRemoteBaseURL() + "/shoppinglist/addextra/";
+	$.post(url, {user_id: getUserId(), 'item_name': item_name}, function(data) {
+		if (logAnyErrors(data)) {
+			var list = $('#thingsToBuy');
+			var extra_shopping_list_item_id = data.results[0].extra_shopping_list_item_id;
+			var id = "checkbox-extra-" + extra_shopping_list_item_id;
+			
+//			$('#thingsToBuy label[for^=checkbox-extra]').last().closest('div').after(
+			list.prepend(
+					'<input type="checkbox" ' + 'name="' + id + '" ' + 'id="' + id + '" ' 
+					+ 'extra_shopping_list_item_id=' + extra_shopping_list_item_id + ' '
+					+ 'class="custom">'
+					+ '<label for="' + id + '">' + item_name + '</label>');
+			$('#shoppinglistPage').trigger('create');
+			$('#extraItem').val('');
+		}
+	});
+});
+			</script>
 		</div>
 	</body>
 </html>

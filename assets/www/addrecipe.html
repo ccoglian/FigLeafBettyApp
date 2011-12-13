@@ -1,0 +1,339 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
+        <title>Add Recipe | Fig Leaf Betty</title>
+
+        <link href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css" />
+	    <link href="css/mobiscroll.1.5.2.css" rel="stylesheet" type="text/css" />
+        <link href="css/themes/mychlorophyll.css" rel="stylesheet" type="text/css" />
+        
+        <script src="js/phonegap.1.2.0.js" type="text/javascript" charset="utf-8"></script> 
+        <script src="js/xui.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/lawnchair/Lawnchair0.6.1.js" type="text/javascript" charset="utf-8"></script>
+		<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+	    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+        <script src="js/MyJqmMods.js" type="text/javascript" charset="utf-8"></script>
+		<script src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
+        <script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript"></script>
+        <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+
+    <body>
+		<div data-role="page" id="addrecipePage" data-url="/addrecipe.html" data-theme="f">
+			<div data-role="header" data-position="fixed" data-theme="f">
+		    	<h1>Add a Recipe</h1>
+		    	<a data-theme="e" href="/home.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>
+		  	</div>
+		  	<div data-role="content" data-theme="f">
+		  		<form id="addrecipeForm">
+		  			<input id="recipe_id" type="hidden"/>
+			  		<div data-role="fieldcontain">
+			  			<label for="title">Title<br/><span class="labelDescription">e.g. Kale Salad</span></label>
+			  			<input id="title" name="title" type="text"></input>
+			  		</div>
+			  		<div data-role="fieldcontain">
+			  			<label for="description">Description<br/><span class="labelDescription">e.g. This recipe is great for...</span></label>
+			  			<textarea id="description" name="description"></textarea>
+			  		</div>
+			  		
+			  		<h3>Ingredients</h3>
+			  		<div data-role="fieldcontain">
+			  			<table id="ingredientsTable">
+			  				<thead>
+				  				<tr>
+				  					<th class="recipeQuantity">Quantity<br/><span class="labelDescription">e.g. 1.5 or 1 1/2</span></th>
+				  					<th class="recipeUnits">Units<br/><span class="labelDescription">e.g. bunches</span></th>
+				  					<th class="recipeIngredient">Ingredient<br/><span class="labelDescription">e.g. kale</span></th>
+				  					<th class="recipeComments">Comments<br/><span class="labelDescription">e.g. (Lacinato, green or red)</span></th>
+				  					<th colspan=2></th>
+				  				</tr>
+			  				</thead>
+			  				<tbody>
+				  				<tr>
+				  					<td class="recipeQuantity"><input type="text"></input></td>
+				  					<td class="recipeUnits"><input class="units" type="text"></td>
+				  					<td class="recipeIngredient"><input type="text"></input></td>
+				  					<td class="recipeComments"><input type="text"></input></td>
+				  					<td class="recipeButtons">
+				  						<div data-role="controlgroup">
+				  							<a class="moveRowUp" data-role="button" data-icon="arrow-u" data-iconpos="notext"/></a>
+				  							<a class="moveRowDown" data-role="button" data-icon="arrow-d" data-iconpos="notext"/></a>
+			  							</div>
+		  							</td>
+				  					<td class="recipeButtons">
+				  						<div data-role="controlgroup">
+				  							<a class="addRow" data-role="button" data-icon="plus" data-iconpos="notext"/></a>
+				  							<a class="deleteRow" data-role="button" data-icon="delete" data-iconpos="notext"/></a>
+			  							</div>
+		  							</td>
+				  				</tr>
+			  				</tbody>
+			  			</table>
+			  		</div>
+			  		
+			  		<div data-role="fieldcontain">
+				  		<table id="ingredientList"></table>
+				  	</div>
+			  		
+			  		<h3>Reminders</h3>
+			  		<div data-role="fieldcontain">
+			  			<table id="remindersTable" style="width: 100%">
+			  				<thead>
+				  				<tr>
+				  					<th>Hours Ahead<br/><span class="labelDescription">e.g. 36</span></th>
+				  					<th style="width: 100%">Description<br/><span class="labelDescription">e.g. Start soaking the beans</span></th>
+				  					<th colspan=2></th>
+				  				</tr>
+			  				</thead>
+			  				<tbody>
+				  				<tr>
+				  					<td><input type="number" style="min-width: 70px"/></td>
+				  					<td><input type="text"></td>
+				  					<td class="recipeButtons">
+				  						<div data-role="controlgroup">
+				  							<a class="moveRowUp" data-role="button" data-icon="arrow-u" data-iconpos="notext"/></a>
+				  							<a class="moveRowDown" data-role="button" data-icon="arrow-d" data-iconpos="notext"/></a>
+			  							</div>
+		  							</td>
+				  					<td class="recipeButtons">
+				  						<div data-role="controlgroup">
+				  							<a class="addRow" data-role="button" data-icon="plus" data-iconpos="notext"/></a>
+				  							<a class="deleteRow" data-role="button" data-icon="delete" data-iconpos="notext"/></a>
+			  							</div>
+		  							</td>
+				  				</tr>
+			  				</tbody>
+			  			</table>
+			  		</div>
+			  		
+			  		<div data-role="fieldcontain">
+			  			<label for="instructions">Instructions<br/><span class="labelDescription">Put each step on its own line.</span></label>
+			  			<textarea id="instructions" name="instructions"></textarea>
+			  		</div>
+			  		<div data-role="fieldcontain">
+			  			<label for="serves">Serves<br/><span class="labelDescription">e.g. Serves 4.</span></label>
+			  			<input id="serves" name="serves" type="text"></input>
+			  		</div>
+		  			<button type="submit">Submit</button>
+	  			</form>
+			</div>
+			<script type="text/javascript">
+$('#addrecipePage').die('pageinit').live('pageinit', function() {
+	updateAutocomplete();
+	
+	$('#addrecipeForm td input').die('change').live('change', function() {
+		console.log('main change');
+		updateIngredientList();
+	});
+	
+	$('#addrecipeForm td.recipeQuantity input').die('change').live('change', function() {
+		console.log('qty change');
+		
+		var inputs = $(this).closest('tr').find('input');
+		var quantity = $(inputs[0]);
+		var units = $(inputs[1]);
+		
+		if (toDecimal(quantity.val()) > 1) {
+			units.val(getPlural(units.val()));
+			units.autocomplete({source: unit_names_plural});
+		} else {
+			units.val(getSingular(units.val()));
+			units.autocomplete({source: unit_names_singular});
+		}
+		
+		updateIngredientList();
+	});
+	
+	$('#addrecipeForm :submit').unbind('click').bind('click', function(e) {
+		e.preventDefault();
+		$.mobile.showPageLoadingMsg();
+		
+		var postData = {user_id: getUserId()};
+		var recipe_items = [];
+		var recipe_reminders = [];
+		
+		postData['recipe_id'] = $('#recipe_id').val();
+		postData['title'] = $('#title').val();
+		postData['description'] = $('#description').val();
+	 	postData['instructions'] = $('#instructions').val();
+		postData['serves'] = $('#serves').val();
+		
+		$('#addrecipeForm td.recipeQuantity').each(function(index, Element) {
+			var inputs = $(this).parent().find('input');
+			var quantity = $(inputs[0]);
+			var units = $(inputs[1]);
+			var ingredient = $(inputs[2]);
+			var comments = $(inputs[3]);
+			
+			if (ingredient.val().length > 0) {
+				recipe_items[recipe_items.length] = {
+					'recipe_id': postData['recipe_id'],
+					'quantity': toDecimal(quantity.val()),
+					'unit_id': getUnitId(units.val()),
+					'item_name': ingredient.val(),
+					'comments': comments.val(),
+				};
+			}
+		});
+		
+		postData['recipe_items'] = recipe_items;
+		
+		$('#remindersTable tbody tr').each(function(index, Element) {
+			var inputs = $(this).find('input');
+			var hours_ahead = $(inputs[0]);
+			var description = $(inputs[1]);
+			
+			if (hours_ahead.val().length > 0
+					&& description.val().length > 0) {
+				recipe_reminders[recipe_reminders.length] = {
+					'recipe_id': postData['recipe_id'],
+					'hours_ahead': toDecimal(hours_ahead.val()),
+					'description': description.val(),
+				};
+			}
+		});
+		
+		postData['recipe_reminders'] = recipe_reminders;
+		
+		var url = getRemoteBaseURL() + '/recipe/save/';
+		$.post(url, postData, function(data) {
+			if (interactiveCallback(data)) {
+				
+			}
+		});
+	});
+});
+
+var unit_names_singular = [];
+var unit_names_plural = [];
+var unit_map = {};
+function updateAutocomplete() {
+	if (!unit_names_singular.length) {
+		var url = getRemoteBaseURL() + "/units";
+		$.getJSON(url, function(data) {
+			logAnyErrors(data);
+			
+			$.each(data.results, function(key, value) {
+				unit_names_singular[unit_names_singular.length] = value.unit_name;
+				unit_names_plural[unit_names_plural.length] = value.unit_name_plural;
+				
+				unit_map[value.unit_name] = value;
+				unit_map[value.unit_name_plural] = value;
+			});
+			
+			updateAutocomplete();
+		});
+	}
+	
+	$(".units").autocomplete({
+		source: unit_names_singular,
+		change: function (event, ui) {
+			console.log('autocomplete change');
+			updateIngredientList();
+		},
+		select: function (event, ui) {
+			console.log('autocomplete select');
+			updateIngredientList();
+		},
+	});
+}
+
+function getUnitId(val) {
+	var map = unit_map[val];
+	
+	if (!map) return val; // TODO Error here
+	
+	return map.unit_id;
+}
+
+function getPlural(val) {
+	var map = unit_map[val];
+	
+	if (!map) return val;
+	
+	return map.unit_name_plural;
+}
+
+function getSingular(val) {
+	var map = unit_map[val];
+	
+	if (!map) return val;
+	
+	return map.unit_name;
+}
+
+// Make sure there's always one blank row at the end of an input table
+function ensureBlankRow() {
+	var table = $(this);
+	var lastRow = table.find('tr').last();
+	
+	if (lastRow.find('input[value!=]').size() > 0) {
+		lastRow.find('.addRow').trigger('click');
+		
+		table.find('tr').last().find('input').removeClass('ui-focus');
+	}
+}
+
+function updateIngredientList() {
+	$('#addrecipeForm table').each(ensureBlankRow);
+	
+	var ingredients = $('#ingredientList');
+	
+	ingredients.html('');
+	
+	$('#addrecipeForm td.recipeQuantity').each(function(index, Element) {
+		var inputs = $(this).closest('tr').find('input');
+		var quantity = $(inputs[0]);
+		var units = $(inputs[1]);
+		var ingredient = $(inputs[2]);
+		var comments = $(inputs[3]);
+		
+		ingredients.append("<tr><td><strong>" + toFraction(toDecimal(quantity.val())) + " " + units.val()
+				+ " " + ingredient.val() + "</strong> " + comments.val() + '</td></tr>');
+	});
+}
+
+$('.addRow').die('click').live('click', function() {
+	var myRow = $(this).closest('tr');
+	var clonedRow = myRow.clone();
+	
+	$(clonedRow).find('input').val('');
+	myRow.after(clonedRow);
+	updateAutocomplete();
+	updateIngredientList();
+});
+
+$('.deleteRow').die('click').live('click', function() {
+	var myRow = $(this).closest('tr');
+	
+	if (myRow.parent().children().size() > 1) {
+		myRow.remove();
+		updateIngredientList();
+	}
+});
+
+$('.moveRowUp').die('click').live('click', function() {
+	var myRow = $(this).closest('tr');
+	
+	if (myRow.prev().length !== 0) {
+		myRow.prev().before(myRow.clone());
+		myRow.remove();
+		updateIngredientList();
+	}
+});
+
+$('.moveRowDown').die('click').live('click', function() {
+	var myRow = $(this).closest('tr');
+	
+	if (myRow.next().length !== 0) {
+		myRow.next().after(myRow.clone());
+		myRow.remove();
+		updateIngredientList();
+	}
+});
+			</script>
+		</div>
+	</body>
+</html>

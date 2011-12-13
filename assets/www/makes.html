@@ -29,6 +29,61 @@
 		  	<div data-role="content" data-theme="f">
 				<ul data-role="listview" class="deletable" id="makesList"></ul>
 			</div>
+			<script type="text/javascript">
+$('#makesPage').die('pageshow').live('pageshow', function(event) {
+	$.mobile.showPageLoadingMsg();
+	
+	$('.liDeleteButton').remove();
+	
+	var url = getRemoteBaseURL() + '/makes/' + getUserId();
+	$.getJSON(url, function(data) {
+		logAnyErrors(data);
+		
+		if (data.length == 0) {
+			// TODO add a link to the recipe search page
+		} else {
+			var list = $('#makesList');
+			var prevDate = null;
+			
+			list.html('');
+			$.each(data.results, function(key, val) {
+				var id = val.recipe_id;
+				var title = val.title;
+				var scheduled_make_id = val.scheduled_make_id;
+				var local_time = new Date(val.local_time);
+				var date = $.scroller.formatDate('DD MM d, yy', local_time);
+				var time = $.scroller.formatDate('h:ii A', local_time);
+				
+				if (date != prevDate) {
+					list.append('<li data-theme="b" data-role="list-divider" role="heading">' + date + '</li>');
+					prevDate = date;
+				}
+				
+				list.append($(document.createElement('li')).attr(
+						{'data-theme': 'c', 'scheduled_make_id': scheduled_make_id}).html(
+						"<a data-identity='recipe" + id + "' "
+						+ "data-url='/recipe.html?id=" + id + "' "
+						+ "href='/recipe.html?id=" + id + "'"
+						+ ">" + title
+						+ '<p class="ui-li-aside ui-li-desc">' + time + '</p>'
+						+ "</a>"));
+			});
+			
+			list.listview("destroy").listview();
+		}
+		
+		$.mobile.hidePageLoadingMsg();
+	});
+});
+
+$('#makesPage .liDeleteButton').die('click').live('click', function(event) {
+	var li = $(this).closest('li');
+	var make_id = li.attr('scheduled_make_id');
+	
+	li.fadeOut();
+	deleteScheduledMake(make_id);
+});
+			</script>
 		</div>
 	</body>
 </html>

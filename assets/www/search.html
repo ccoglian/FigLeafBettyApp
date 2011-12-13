@@ -35,6 +35,49 @@
 					<ul data-role="listview" id="searchResultsList"></ul>
 				</p> 
 			</div>
+			<script type="text/javascript">
+$('#searchPage').die('pageinit').live('pageinit', function(event) {
+    $('#searchBox').val(getLocalStorage('lastSearchKey', ''));
+    
+	$('#searchButton').unbind('click').bind('click', function(e) {
+		e.preventDefault();
+		
+		var key = $("#searchBox").val();
+		
+		if (key == "") return;
+		
+		putLocalStorage('lastSearchKey', key);
+		
+		$.mobile.showPageLoadingMsg();
+		
+		var url = getRemoteBaseURL() + '/search/' + key;
+		$.getJSON(url, function(data) {
+			if (data.length == 0) {
+				showMessageToast('No results found');
+			} else {
+				var list = $('#searchResultsList');
+				
+				list.html("");
+				
+				$.each(data, function(key, val) {
+					var id = val.id;
+					var title = val.title;
+					
+					list.append($(document.createElement('li')).attr('data-theme', 'c').html(
+							"<a data-identity='recipe" + id + "' "
+							+ "data-url='/recipe.html?id=" + id + "' "
+							+ "href='/recipe.html?id=" + id + "'"
+							+ ">" + title + "</a>"));
+				});
+				
+				list.listview("destroy").listview();
+			}
+			
+			$.mobile.hidePageLoadingMsg();
+		});
+	});
+});
+			</script>
 		</div>
 	</body>
 </html>
