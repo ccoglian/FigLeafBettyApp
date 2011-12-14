@@ -864,6 +864,7 @@ PhoneGap.JSCallback = function() {
 
             // If error, revert to polling
             else {
+            	console.log("" + xmlhttp.status);
                 console.log("JSCallback Error: Request failed.");
                 PhoneGap.UsePolling = true;
                 PhoneGap.JSCallbackPolling();
@@ -877,6 +878,7 @@ PhoneGap.JSCallback = function() {
     if (PhoneGap.JSCallbackToken === null) {
         PhoneGap.JSCallbackToken = prompt("getToken", "gap_callbackServer:");
     }
+    console.log("http://127.0.0.1:"+PhoneGap.JSCallbackPort+"/"+PhoneGap.JSCallbackToken);
     xmlhttp.open("GET", "http://127.0.0.1:"+PhoneGap.JSCallbackPort+"/"+PhoneGap.JSCallbackToken , true);
     xmlhttp.send();
 };

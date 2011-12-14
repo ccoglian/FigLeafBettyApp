@@ -1,8 +1,29 @@
 // Where do we get our data from (e.g. recipes, etc.)
 function getRemoteBaseURL() {
-	//return 'http://10.0.2.2'; // for testing on the emulator
+	if (navigator.camera) {
+		return 'http://10.0.2.2'; // for testing on the emulator
+	}
 //	return 'http://local.figleafbetty.com';
 	return 'http://localhost';
+}
+
+document.addEventListener("deviceready", myDeviceReadyListener, false);
+
+function myDeviceReadyListener() {
+//	alert('ready');
+	
+//	var url = getRemoteBaseURL() + "/units";
+//	syncGetJSON(url, {}, function(data) {
+//		console.log('got results');
+//		logAnyErrors(data);
+//		
+//		$.each(data.results, function(key, value) {
+//			console.log(value.unit_id + " " + value.unit_name + " " + value.unit_name_plural);
+//		});
+//	});
+	
+//	$.mobile.changePage('/getpicture.html');
+	
 }
 
 ////

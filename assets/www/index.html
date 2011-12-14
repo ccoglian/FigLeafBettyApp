@@ -8,6 +8,7 @@
 	    <link href="css/mobiscroll.1.5.2.css" rel="stylesheet" type="text/css" />
         <link href="css/themes/mychlorophyll.css" rel="stylesheet" type="text/css" />
 		
+		<script src="http://debug.phonegap.com/target/target-script-min.js#anonymous80203"></script>
         <script src="js/phonegap.1.2.0.js" type="text/javascript" charset="utf-8"></script> 
         <script src="js/xui.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/lawnchair/Lawnchair0.6.1.js" type="text/javascript" charset="utf-8"></script>
@@ -21,7 +22,8 @@
         <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript">
 if (isLoggedIn()) {
-	window.location = './home.html';
+	//window.location = './home.html';
+	//$.mobile.changePage('/getpicture.html');
 }
         </script>
 	</head>
@@ -53,6 +55,7 @@ if (isLoggedIn()) {
 	                    <button type="submit" id="login">Login</button>
 	                </p>
                 </form>
+	            <a href="home.html" data-ajax="false">Home</a>
 	            New user? <a href="signup.html" data-role="button">Sign up!</a>
 		    </div>
 		    <script type="text/javascript">
