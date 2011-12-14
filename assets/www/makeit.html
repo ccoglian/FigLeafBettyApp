@@ -17,6 +17,7 @@
 		<script src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
         <script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
 	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript"></script>
+        <script src="js/inflection.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
 	</head>
 
@@ -30,7 +31,7 @@
 		  		<table style="border-collapse: collapse" id="recipe_reminders">
 				</table>
 		  		<button type="submit" id="setremindersButton">Set Reminders</button>
-		  		<a data-role='button' data-theme="r" id="deleteMakeButton">Delete</a>
+		  		<a data-role='button' data-theme="r" id="deleteMakeButton">Delete Reminders</a>
 			</div>
 			<script type="text/javascript">
 $('#makeitPage').die('pageshow').live('pageshow', function(event) {
@@ -59,6 +60,7 @@ $('#makeitPage').die('pageshow').live('pageshow', function(event) {
 		$('input[id^=date]').each(function(input) {
 			var recipe_reminder_id = $(this).attr('recipe_reminder_id');
 			var scheduled_reminder_id = $(this).attr('scheduled_reminder_id');
+			var description = $('label[for=' + $(this).attr('id') + ']').val();
 			var local_time = $(this).val();
 			
 			if (recipe_reminder_id >= 1) {
@@ -66,6 +68,7 @@ $('#makeitPage').die('pageshow').live('pageshow', function(event) {
 						recipe_reminder_id: recipe_reminder_id,
 						scheduled_make_id: scheduled_make_id,
 						scheduled_reminder_id: scheduled_reminder_id || 0,
+						description: description,
 						local_time: local_time,
 						server_time: new Date(local_time).toUTCString()
 				};

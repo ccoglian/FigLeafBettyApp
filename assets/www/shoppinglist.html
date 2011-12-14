@@ -17,6 +17,7 @@
 		<script src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
         <script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
 	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript"></script>
+        <script src="js/inflection.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
 	</head>
 
@@ -61,8 +62,8 @@ $('#shoppinglistPage').die('pageshow').live('pageshow', function(e) {
 			var thingsToBuy = $('#thingsToBuy');
 			var thingsIHave = $('#thingsIHave');
 			
-			thingsToBuy.html('');
-			thingsIHave.html('');
+			thingsToBuy.empty();
+			thingsIHave.empty();
 			
 			$.each(data.results.extraShoppingListItems, function(key, item) {
 				var active = parseInt(item.active);
@@ -93,7 +94,7 @@ $('#shoppinglistPage').die('pageshow').live('pageshow', function(e) {
 						+ 'shopping_list_item_ids=' + shopping_list_item_ids + ' '
 						+ checked
 						+ 'class="custom">'
-						+ '<label for="' + id + '">' + item_name + ' (' + quantity + ' ' + unit_name + ')</label>');
+						+ '<label for="' + id + '">' + item_name + ' (' + $.trim(quantity + ' ' + unit_name) + ')</label>');
 			});
 			
 			$('#shoppinglistPage').trigger('create');
@@ -129,8 +130,8 @@ $('#clearShoppingListButton').die('click').live('click', function(e) {
 			var thingsToBuy = $('#thingsToBuy');
 			var thingsIHave = $('#thingsIHave');
 			
-			thingsToBuy.html('');
-			thingsIHave.html('');
+			thingsToBuy.empty();
+			thingsIHave.empty();
 		}
 	});
 });

@@ -56,14 +56,14 @@ function changeButtonText(selector, text) {
 
 function deleteScheduledMake(id) {
 	$.mobile.showPageLoadingMsg();
-	
 	var url = getRemoteBaseURL() + '/deletemake/' + id;
-	
-	$.post(url, function(data) {
-		logAnyErrors(data);
-		
-		$.mobile.hidePageLoadingMsg();
-	});
+	$.post(url, interactiveCallback);
+}
+
+function deleteRecipe(id) {
+	$.mobile.showPageLoadingMsg();
+	var url = getRemoteBaseURL() + '/recipe/delete/' + id;
+	$.post(url, interactiveCallback);
 }
 
 function hidenull(str) {
@@ -111,7 +111,7 @@ function getStatusBox(title, msg, type) {
 }
 
 function showFormErrors(errors) {
-	$('td[id$="_status_box"]:visible').html(''); // ends with
+	$('td[id$="_status_box"]:visible').empty(); // ends with
     $.each(errors, function(key, value) {
         $('[id=' + key + '_status_box]:visible').html(getStatusBox($('label[for=' + key + ']:visible').text() + ':', value, 'error'));
     });
@@ -136,6 +136,29 @@ function interactiveCallback(data) {
 	}
 	
 	return data.success;
+}
+
+////
+// Ajax Helpers
+////
+function syncGetJSON(url, data, success) {
+	$.ajax({
+		url: url,
+		dataType: 'json',
+		async: false,
+		data: data,
+		success: success,
+	});
+}
+
+function syncPost(url, postData, success) {
+	$.ajax({
+		type: 'POST',
+		url: url,
+		async: false,
+		data: postData,
+		success: success,
+	});
 }
 
 ////

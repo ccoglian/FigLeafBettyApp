@@ -17,14 +17,16 @@
 		<script src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
         <script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
 	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript"></script>
+        <script src="js/inflection.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
 	</head>
 
     <body>
-		<div data-role="page" id="addrecipePage" data-url="/addrecipe.html" data-theme="f">
+		<div data-role="page" id="addrecipePage" data-dom-cache="true" data-url="/addrecipe.html" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
 		    	<h1>Add a Recipe</h1>
-		    	<a data-theme="e" href="/home.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>
+<!--		    	<a data-theme="e" href="/home.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>-->
+		    	<a href="/home.html" data-icon="arrow-l" data-iconpos="left" data-rel="back" data-theme="e">Back</a>
 		  	</div>
 		  	<div data-role="content" data-theme="f">
 		  		<form id="addrecipeForm">
@@ -117,11 +119,14 @@
 			  			<input id="serves" name="serves" type="text"></input>
 			  		</div>
 		  			<button type="submit">Submit</button>
+			  		<a data-role='button' data-theme="r" id="deleteRecipeButton">Delete Recipe</a>
 	  			</form>
 			</div>
 			<script type="text/javascript">
-$('#addrecipePage').die('pageinit').live('pageinit', function() {
+$('#addrecipePage').die('pageshow').live('pageshow', function() {
 	updateAutocomplete();
+	
+	//$.mobile.loadPage('/addunit.html', {showLoadMsg: false});
 	
 	$('#addrecipeForm td input').die('change').live('change', function() {
 		console.log('main change');
@@ -166,12 +171,30 @@ $('#addrecipePage').die('pageinit').live('pageinit', function() {
 			var units = $(inputs[1]);
 			var ingredient = $(inputs[2]);
 			var comments = $(inputs[3]);
+			var recipe_item_id = ingredient.attr('recipe_item_id');
+			var unit_id = getUnitId(units.val());
+			
+			if (!unit_id || unit_id <= 0) {
+				var singular = '' + units.val().singularize();
+				var plural = '' + units.val().pluralize();
+				var unitData = {unit_name: singular,
+								unit_name_plural: plural,
+								};
+				var url = getRemoteBaseURL() + '/unit/add/';
+				syncPost(url, unitData, function(data) {
+					logAnyErrors(data);
+					updateAutocomplete('force');
+				});
+				
+				unit_id = getUnitId(units.val());
+			}
 			
 			if (ingredient.val().length > 0) {
 				recipe_items[recipe_items.length] = {
 					'recipe_id': postData['recipe_id'],
+					'recipe_item_id': recipe_item_id,
 					'quantity': toDecimal(quantity.val()),
-					'unit_id': getUnitId(units.val()),
+					'unit_id': unit_id,
 					'item_name': ingredient.val(),
 					'comments': comments.val(),
 				};
@@ -184,11 +207,13 @@ $('#addrecipePage').die('pageinit').live('pageinit', function() {
 			var inputs = $(this).find('input');
 			var hours_ahead = $(inputs[0]);
 			var description = $(inputs[1]);
+			var recipe_reminder_id = description.attr('recipe_reminder_id');
 			
 			if (hours_ahead.val().length > 0
 					&& description.val().length > 0) {
 				recipe_reminders[recipe_reminders.length] = {
 					'recipe_id': postData['recipe_id'],
+					'recipe_reminder_id': recipe_reminder_id,
 					'hours_ahead': toDecimal(hours_ahead.val()),
 					'description': description.val(),
 				};
@@ -200,19 +225,31 @@ $('#addrecipePage').die('pageinit').live('pageinit', function() {
 		var url = getRemoteBaseURL() + '/recipe/save/';
 		$.post(url, postData, function(data) {
 			if (interactiveCallback(data)) {
-				
+				putLocalStorage('recipe_id', data.results.recipe_id);
+				$('#addrecipePage').trigger('pageshow');
 			}
 		});
 	});
+	
+	$('#deleteRecipeButton').unbind('click').bind('click', function() {
+		deleteRecipe($('#recipe_id').val());
+		window.history.go(-1);
+	});
+	
+	loadFromRecipe();
 });
 
 var unit_names_singular = [];
 var unit_names_plural = [];
 var unit_map = {};
-function updateAutocomplete() {
-	if (!unit_names_singular.length) {
+function updateAutocomplete(force) {
+	if (!unit_names_singular.length || force) {
+		unit_names_singular = [];
+		unit_names_plural = [];
+		unit_map = {};
+	
 		var url = getRemoteBaseURL() + "/units";
-		$.getJSON(url, function(data) {
+		syncGetJSON(url, {}, function(data) {
 			logAnyErrors(data);
 			
 			$.each(data.results, function(key, value) {
@@ -222,8 +259,6 @@ function updateAutocomplete() {
 				unit_map[value.unit_name] = value;
 				unit_map[value.unit_name_plural] = value;
 			});
-			
-			updateAutocomplete();
 		});
 	}
 	
@@ -243,7 +278,7 @@ function updateAutocomplete() {
 function getUnitId(val) {
 	var map = unit_map[val];
 	
-	if (!map) return val; // TODO Error here
+	if (!map) return null;
 	
 	return map.unit_id;
 }
@@ -281,7 +316,7 @@ function updateIngredientList() {
 	
 	var ingredients = $('#ingredientList');
 	
-	ingredients.html('');
+	ingredients.empty();
 	
 	$('#addrecipeForm td.recipeQuantity').each(function(index, Element) {
 		var inputs = $(this).closest('tr').find('input');
@@ -300,6 +335,8 @@ $('.addRow').die('click').live('click', function() {
 	var clonedRow = myRow.clone();
 	
 	$(clonedRow).find('input').val('');
+	$(clonedRow).find('[recipe_item_id]').removeAttr('recipe_item_id');
+	$(clonedRow).find('[recipe_reminder_id]').removeAttr('recipe_reminder_id');
 	myRow.after(clonedRow);
 	updateAutocomplete();
 	updateIngredientList();
@@ -333,6 +370,84 @@ $('.moveRowDown').die('click').live('click', function() {
 		updateIngredientList();
 	}
 });
+
+function loadFromRecipe() {
+	var recipeId = getLocalStorage('recipe_id');
+	
+	if (!recipeId || recipeId <= 0) {
+		$('#deleteRecipeButton').hide();
+		return;
+	}
+	
+	$('#deleteRecipeButton').show();
+	
+	var url = getRemoteBaseURL() + '/recipe/' + recipeId;
+	$.getJSON(url, {user_id: getUserId()}, function(data) {
+		var results = data.results;
+		var recipe = results.recipe;
+		var title = recipe.title;
+		var image_url = recipe.image_url;
+		var description = recipe.description;
+		var recipe_items = results.recipe_items;
+		var instructions = recipe.instructions;
+		var serves = recipe.serves;
+		var default_reminders = results.default_reminders;
+		var scheduled_make = results.scheduled_make;
+		
+		$('#recipe_id').val(recipeId);
+		$('#title').val(title);
+		$('#image').html('<img alt="' + title + '" src="' + image_url
+				+ '" style="display: block; margin-left: auto; margin-right: auto; width=\'300\'">');
+		$('#description').html(description);
+		
+		var table = $('#ingredientsTable');
+		
+		while ($('#ingredientsTable tbody tr').length > 1) {
+			$('#ingredientsTable tbody tr').last().remove();
+		}
+		
+		$.each(recipe_items, function(key, item) {
+			var recipe_item_id = item.recipe_item_id;
+			var quantity = toFraction(item.quantity);
+			var unit_name = item.quantity <= 1 ? item.unit.unit_name : item.unit.unit_name_plural;
+			var item_name = item.item_name;
+			var comments = hidenull(item.comments);
+			var lastRow = table.find('tr').last();
+			var inputs = lastRow.find('input');
+			var i = 0;
+			
+			$(inputs[i++]).val(quantity);
+			$(inputs[i++]).val(unit_name);
+			$(inputs[i++]).val(item_name).attr('recipe_item_id', recipe_item_id);
+			$(inputs[i++]).val(comments);
+			
+			lastRow.find('.addRow').trigger('click');
+		});
+		
+		$('#instructions').html(instructions);
+		$('#serves').val(serves);
+		
+		var table = $('#remindersTable');
+		
+		while ($('#remindersTable tbody tr').length > 1) {
+			$('#remindersTable tbody tr').last().remove();
+		}
+		
+		$.each(default_reminders, function(key, item) {
+			var recipe_reminder_id = item.recipe_reminder_id;
+			var description = item.description;
+			var hours_ahead = item.hours_ahead;
+			var lastRow = table.find('tr').last();
+			var inputs = lastRow.find('input');
+			var i = 0;
+			
+			$(inputs[i++]).val(hours_ahead);
+			$(inputs[i++]).val(description).attr('recipe_reminder_id', recipe_reminder_id);
+			
+			lastRow.find('.addRow').trigger('click');
+		});
+	});
+};
 			</script>
 		</div>
 	</body>

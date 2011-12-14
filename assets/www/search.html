@@ -17,6 +17,7 @@
 		<script src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
         <script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
 	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript"></script>
+        <script src="js/inflection.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
 	</head>
 
@@ -41,7 +42,6 @@ $('#searchPage').die('pageinit').live('pageinit', function(event) {
     
 	$('#searchButton').unbind('click').bind('click', function(e) {
 		e.preventDefault();
-		
 		var key = $("#searchBox").val();
 		
 		if (key == "") return;
@@ -49,17 +49,18 @@ $('#searchPage').die('pageinit').live('pageinit', function(event) {
 		putLocalStorage('lastSearchKey', key);
 		
 		$.mobile.showPageLoadingMsg();
-		
 		var url = getRemoteBaseURL() + '/search/' + key;
 		$.getJSON(url, function(data) {
-			if (data.length == 0) {
+			logAnyErrors(data);
+			
+			if (data.results.length == 0) {
 				showMessageToast('No results found');
 			} else {
 				var list = $('#searchResultsList');
 				
-				list.html("");
+				list.empty();
 				
-				$.each(data, function(key, val) {
+				$.each(data.results, function(key, val) {
 					var id = val.id;
 					var title = val.title;
 					
