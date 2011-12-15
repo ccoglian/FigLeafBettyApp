@@ -4,38 +4,46 @@
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
         <title>Add Recipe | Fig Leaf Betty</title>
 
-        <link href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css" />
+        <link href="css/themes/jquery.mobile.1.0.css" rel="stylesheet" type="text/css" />
 	    <link href="css/mobiscroll.1.5.2.css" rel="stylesheet" type="text/css" />
         <link href="css/themes/mychlorophyll.css" rel="stylesheet" type="text/css" />
         
-		<script src="http://debug.phonegap.com/target/target-script-min.js#anonymous80203"></script>
+<!--		<script src="http://debug.phonegap.com/target/target-script-min.js#anonymous80203"></script>-->
         <script src="js/phonegap.1.2.0.js" type="text/javascript" charset="utf-8"></script> 
-        <script src="js/xui.js" type="text/javascript" charset="utf-8"></script>
-        <script src="js/lawnchair/Lawnchair0.6.1.js" type="text/javascript" charset="utf-8"></script>
-		<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
-	    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+		<script src="js/jquery.1.6.4.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="js/jqueryui.1.8.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/MyJqmMods.js" type="text/javascript" charset="utf-8"></script>
-		<script src="js/jquery.mobile.1.0.js"></script>
+		<script src="js/jquery.mobile.1.0.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
-	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript"></script>
+	    <script src="js/mobiscroll.1.5.2.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/inflection.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/ajaxfileupload.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
 	</head>
 
     <body>
-		<div data-role="page" id="addrecipePage" data-dom-cache="true" data-url="/addrecipe.html" data-theme="f">
+		<div data-role="page" id="addrecipePage" data-dom-cache="true" fdata-url="/addrecipe.html" data-theme="f">
 			<div data-role="header" data-position="fixed" data-theme="f">
-		    	<h1>Add a Recipe</h1>
+		    	<h1 id="headerTitle">Add a Recipe</h1>
 <!--		    	<a data-theme="e" href="/home.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>-->
-		    	<a href="/home.html" data-icon="arrow-l" data-iconpos="left" data-rel="back" data-theme="e">Back</a>
+		    	<a href="home.html" data-icon="arrow-l" data-iconpos="left" data-rel="back" data-theme="e">Back</a>
 		  	</div>
 		  	<div data-role="content" data-theme="f">
 		  		<form id="addrecipeForm">
-		  			<input id="recipe_id" type="hidden"/>
 			  		<div data-role="fieldcontain">
 			  			<label for="title">Title<br/><span class="labelDescription">e.g. Kale Salad</span></label>
 			  			<input id="title" name="title" type="text"></input>
 			  		</div>
+			  		<div data-role="fieldcontain">
+			  			<label for="image">Image<br/><span class="labelDescription">e.g	choose a file...</span></label>
+						<input id="image" name="image" type="file"></input>
+						<input id="imageMobile" type="hidden"/>
+						<div id="fileLoadMobile" class="ui-grid-a">
+						    <div class="ui-block-a"><a data-role="button" onclick="capturePhoto();" data-theme="c">Take a Picture!</a></div>
+						    <div class="ui-block-b"><a data-role="button" onclick="getPhoto();" data-theme="c">Get Photo From Album</a></div>
+					  	</div>
+			  		</div>
+			  		<div id="image_display"></div>
 			  		<div data-role="fieldcontain">
 			  			<label for="description">Description<br/><span class="labelDescription">e.g. This recipe is great for...</span></label>
 			  			<textarea id="description" name="description"></textarea>
@@ -119,15 +127,24 @@
 			  			<label for="serves">Serves<br/><span class="labelDescription">e.g. Serves 4.</span></label>
 			  			<input id="serves" name="serves" type="text"></input>
 			  		</div>
-		  			<button type="submit">Submit</button>
+		  			<button type="submit">Save</button>
+		  			<br/>
+		  			<br/>
+		  			<br/>
 			  		<a data-role='button' data-theme="r" id="deleteRecipeButton">Delete Recipe</a>
 	  			</form>
 			</div>
 			<script type="text/javascript">
 $('#addrecipePage').die('pageshow').live('pageshow', function() {
-	updateAutocomplete();
+	if (navigator.camera) {
+		$('#image').hide();
+		$('#fileLoadMobile').show();
+	} else {
+		$('#image').show();
+		$('#fileLoadMobile').hide();
+	}
 	
-	//$.mobile.loadPage('/addunit.html', {showLoadMsg: false});
+	updateAutocomplete();
 	
 	$('#addrecipeForm td input').die('change').live('change', function() {
 		console.log('main change');
@@ -160,7 +177,7 @@ $('#addrecipePage').die('pageshow').live('pageshow', function() {
 		var recipe_items = [];
 		var recipe_reminders = [];
 		
-		postData['recipe_id'] = $('#recipe_id').val();
+		postData['recipe_id'] = getRecipeId();
 		postData['title'] = $('#title').val();
 		postData['description'] = $('#description').val();
 	 	postData['instructions'] = $('#instructions').val();
@@ -226,18 +243,40 @@ $('#addrecipePage').die('pageshow').live('pageshow', function() {
 		var url = getRemoteBaseURL() + '/recipe/save/';
 		$.post(url, postData, function(data) {
 			if (interactiveCallback(data)) {
-				putLocalStorage('recipe_id', data.results.recipe_id);
-				$('#addrecipePage').trigger('pageshow');
+				setRecipeId(data.results.recipe_id);
+				
+				if ($('#image').val()) {
+					var url = getRemoteBaseURL() + '/recipe/image/add/' + getRecipeId();
+					$.ajaxFileUpload({
+		                url: url,
+	                	secureuri: false,
+	                	fileElementId: 'image',
+	                	dataType: 'json',
+	                	success: function (data, status) {
+	                    	$('#addrecipePage').trigger('pageshow'); // reload to set up all the IDs everywhere
+		                },
+	    	            error: function (data, status, e) {
+	    	            	console.log('error: ' + e);
+	            	        alert(e);
+	                	}
+	            	});
+				} else if ($('#imageMobile').val()) {
+					uploadPhoto($('#imageMobile').val());
+					$('#addrecipePage').trigger('pageshow'); // reload to set up all the IDs everywhere
+   				} else {
+					$('#addrecipePage').trigger('pageshow'); // reload to set up all the IDs everywhere
+				}
 			}
 		});
 	});
 	
 	$('#deleteRecipeButton').unbind('click').bind('click', function() {
-		deleteRecipe($('#recipe_id').val());
+		deleteRecipe(getRecipeId());
 		window.history.go(-1);
 	});
 	
 	loadFromRecipe();
+	$('html, body').animate({scrollTop:0}, 'fast');
 });
 
 var unit_names_singular = [];
@@ -373,7 +412,26 @@ $('.moveRowDown').die('click').live('click', function() {
 });
 
 function loadFromRecipe() {
-	var recipeId = getLocalStorage('recipe_id');
+	$('#headerTitle').html('Add a Recipe');
+	$('#title').val('');
+	$('#image_display').empty();
+	$('#description').empty();
+	$('#instructions').empty();
+	$('#serves').val('');
+	$('#ingredientsTable tbody input').val('');
+	$('#remindersTable tbody input').val('');
+	
+	while ($('#ingredientsTable tbody tr').length > 1) {
+		$('#ingredientsTable tbody tr').last().remove();
+	}
+	
+	while ($('#remindersTable tbody tr').length > 1) {
+		$('#remindersTable tbody tr').last().remove();
+	}
+	
+	updateIngredientList();
+	
+	var recipeId = getRecipeId();
 	
 	if (!recipeId || recipeId <= 0) {
 		$('#deleteRecipeButton').hide();
@@ -394,19 +452,14 @@ function loadFromRecipe() {
 		var serves = recipe.serves;
 		var default_reminders = results.default_reminders;
 		var scheduled_make = results.scheduled_make;
+		var img = image_url ? '<img src="' + image_url + '" class="recipe"><br/>' : '';
 		
-		$('#recipe_id').val(recipeId);
+		$('#headerTitle').html('Edit Recipe');
 		$('#title').val(title);
-		$('#image').html('<img alt="' + title + '" src="' + image_url
-				+ '" style="display: block; margin-left: auto; margin-right: auto; width=\'300\'">');
+		$('#image_display').html(img);
 		$('#description').html(description);
 		
 		var table = $('#ingredientsTable');
-		
-		while ($('#ingredientsTable tbody tr').length > 1) {
-			$('#ingredientsTable tbody tr').last().remove();
-		}
-		
 		$.each(recipe_items, function(key, item) {
 			var recipe_item_id = item.recipe_item_id;
 			var quantity = toFraction(item.quantity);
@@ -429,11 +482,6 @@ function loadFromRecipe() {
 		$('#serves').val(serves);
 		
 		var table = $('#remindersTable');
-		
-		while ($('#remindersTable tbody tr').length > 1) {
-			$('#remindersTable tbody tr').last().remove();
-		}
-		
 		$.each(default_reminders, function(key, item) {
 			var recipe_reminder_id = item.recipe_reminder_id;
 			var description = item.description;
@@ -449,6 +497,56 @@ function loadFromRecipe() {
 		});
 	});
 };
+
+// Take picture using device camera and retrieve image as filename
+function capturePhoto() {
+	navigator.camera.getPicture(onPhotoURISuccess, onFail, {
+		quality: 20,
+		destinationType: navigator.camera.DestinationType.FILE_URI,
+	});
+}
+
+// Retrieve image file location from specified source
+function getPhoto() {
+	navigator.camera.getPicture(onPhotoURISuccess, onFail, {
+		quality: 20, 
+		destinationType: navigator.camera.DestinationType.FILE_URI,
+		sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY,
+	});
+}
+
+// Called when a photo is successfully retrieved
+//
+function onPhotoURISuccess(imageURI) {
+	console.log("imageURI: " + imageURI);
+	$('#imageMobile').val(imageURI);
+	$('#image_display').html('<img src="' + imageURI + '" class="recipe" style="max-width: 300px; max-height: 300px"><br/>');
+}
+
+function onFail(message) {
+	alert('Failed because: ' + message);
+}
+
+function uploadPhoto(imageURI) {
+	var options = new FileUploadOptions();
+	options.fileKey = "image";
+	options.fileName = imageURI.substr(imageURI.lastIndexOf('/') + 1) + ".jpg";
+	options.mimeType = "image/jpeg";
+
+	var ft = new FileTransfer();
+	var url = getRemoteBaseURL() + '/recipe/image/add/' + getRecipeId();
+	ft.upload(imageURI, url,
+		function(r) {
+			console.log("Code = " + r.responseCode);
+			console.log("Response = " + r.response);
+			console.log("Sent = " + r.bytesSent);
+		},
+		function(error) {
+			alert("An error has occurred: Code = " = error.code);
+		},
+		options
+	);
+}
 			</script>
 		</div>
 	</body>

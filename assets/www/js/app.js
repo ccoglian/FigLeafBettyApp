@@ -201,6 +201,18 @@ function logOut() {
 	setUserId(-1);
 }
 
+function getRecipeId() {
+	return getLocalStorage('recipe_id');
+}
+
+function setRecipeId(id) {
+	putLocalStorage('recipe_id', id);
+}
+
+function clearRecipeId() {
+	deleteLocalStorage('recipe_id');
+}
+
 ////
 // Persistent Storage
 ////

@@ -184,6 +184,11 @@
 
 .allrounded .ui-checkbox { margin: 0; }
 .linethrough label { text-decoration: line-through; font-weight: normal; }
+
+img.recipe {
+	display: block; margin-left: auto; margin-right: auto;
+}
+
 .labelDescription { font-size: smaller; color: gray; font-weight: normal; }
 
 .recipeQuantity { max-width: 50px; }
