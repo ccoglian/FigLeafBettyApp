@@ -1,7 +1,8 @@
 // Where do we get our data from (e.g. recipes, etc.)
 function getRemoteBaseURL() {
 	if (navigator.camera) {
-		return 'http://10.0.2.2'; // for testing on the emulator
+		return 'http://192.168.1.100'; // for testing on the phone
+//		return 'http://10.0.2.2'; // for testing on the emulator
 	}
 //	return 'http://local.figleafbetty.com';
 	return 'http://localhost';
