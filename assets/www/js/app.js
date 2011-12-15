@@ -1,7 +1,11 @@
+$.ajaxSetup({
+	cache: false,
+});
+
 // Where do we get our data from (e.g. recipes, etc.)
 function getRemoteBaseURL() {
 	if (navigator.camera) {
-		return 'http://192.168.1.100'; // for testing on the phone
+		return 'http://192.168.1.100'; // for testing on the phone or the emulator
 //		return 'http://10.0.2.2'; // for testing on the emulator
 	}
 //	return 'http://local.figleafbetty.com';
@@ -48,11 +52,11 @@ $('.deletable li').live('swipeleft', function(event) {
 });
 
 // Hide the delete button when you tap anywhere on the page
-$('div[data-role=page]').live('tap', function(event) {
-	if ($('.liDeleteButton:visible').length > 0) {
-		$('.liDeleteButton').hide("slide", { direction: "right" }, 500);
-	}
-});
+//$('div[data-role=page]').live('tap', function(event) {
+//	if ($('.liDeleteButton:visible').length > 0) {
+//		$('.liDeleteButton').hide("slide", { direction: "right" }, 500);
+//	}
+//});
 
 // TEST for testing in a browser 
 $('.deletable li').live('mousedown', function(e) {
