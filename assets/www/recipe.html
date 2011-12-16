@@ -2,6 +2,8 @@
 <html>
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
+        <meta http-equiv="cache-control" content="no-cache">
+        <meta http-equiv="pragma" content="no-cache">
         <title>Recipe</title>
 
         <link href="css/themes/jquery.mobile.1.0.css" rel="stylesheet" type="text/css" />
@@ -52,10 +54,10 @@ $('#recipePage').die('pageshow').live('pageshow', function() {
 	// this would just be another page in the recipe.html page but then we can't load 
 	// recipe.html using ajax and the nice transitions so we pre-load it here and cache
 	// it in the DOM
-	$.mobile.loadPage('/makeit.html', {showLoadMsg: false});
+	$.mobile.loadPage('makeit.html', {showLoadMsg: false});
 	
 	// load this here to allow "Edit Recipe" to be an ajax page transition
-	$.mobile.loadPage('/addrecipe.html', {showLoadMsg: false});
+	$.mobile.loadPage('addrecipe.html', {showLoadMsg: false});
 	
 	var url = getRemoteBaseURL() + '/recipe/' + id;
 	$.getJSON(url, {user_id: getUserId()}, function(data) {
@@ -150,7 +152,7 @@ $('#recipePage').die('pageshow').live('pageshow', function() {
 		
 		// add jQuery Mobile styling to dynamically inserted content
 		$('#makeitPage').trigger('create');
-		setTimeout("$('#recipePage').trigger('updatelayout');", 1000);
+		setTimeout("$('#recipePage').trigger('updatelayout');", 200);
 		
 		$.mobile.hidePageLoadingMsg();
 	});

@@ -1,3 +1,5 @@
+alert('1.0.2');
+
 $.ajaxSetup({
 	cache: false,
 });
