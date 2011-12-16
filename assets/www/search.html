@@ -46,7 +46,7 @@ $('#searchPage').die('pageinit').live('pageinit', function(event) {
 		e.preventDefault();
 		var key = $("#searchBox").val();
 		
-		if (key == "") return;
+		if (key == "") return false;
 		
 		putLocalStorage('lastSearchKey', key);
 		
@@ -75,6 +75,8 @@ $('#searchPage').die('pageinit').live('pageinit', function(event) {
 			
 			$.mobile.hidePageLoadingMsg();
 		});
+		
+		return false;
 	});
 });
 			</script>

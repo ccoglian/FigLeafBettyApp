@@ -264,6 +264,7 @@ $('#addrecipePage').die('pageshow').live('pageshow', function() {
 	            	});
 				} else if ($('#imageMobile').val()) {
 					uploadPhoto($('#imageMobile').val());
+					$('#imageMobile').empty();
    				} else {
 					$('#addrecipePage').trigger('pageshow'); // reload to set up all the IDs everywhere
 				}
@@ -416,6 +417,7 @@ function loadFromRecipe() {
 	$('#headerTitle').html('Add a Recipe');
 	$('#title').val('');
 	$('#image_display').empty();
+	$('#imageMobile').empty();
 	$('#description').empty();
 	$('#instructions').empty();
 	$('#serves').val('');
