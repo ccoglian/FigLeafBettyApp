@@ -67,6 +67,12 @@
 $('#signupPage').die('pageinit').live('pageinit', function(event) {
 	$('#signupButton').unbind('click').bind('click', function(e) {
 		e.preventDefault();
+		$('#signupForm').submit();
+		return false;
+	});
+	
+	$('#signupForm').unbind('submit').bind('submit', function(e) {
+		e.preventDefault();
 		$.mobile.showPageLoadingMsg();
 		
 		var url = getRemoteBaseURL() + '/signup';
@@ -81,6 +87,8 @@ $('#signupPage').die('pageinit').live('pageinit', function(event) {
 				showFormErrors(data.errors);
 			}
 		});
+		
+		return false;
 	});
 });
 		    </script>

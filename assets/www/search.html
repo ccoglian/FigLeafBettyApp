@@ -30,7 +30,7 @@
 		    	<a data-theme="e" href="home.html" data-rel="back" data-role="button" data-icon="home" data-iconpos="notext"></a>
 		  	</div>
 		  	<div data-role="content" data-theme="f">
-		  		<form>
+		  		<form id="searchForm">
 					<input type="text" data-type="search" name="search" id="searchBox" value="" /> 
 					<button type="submit" id="searchButton">Search</button>
 				</form>
@@ -43,6 +43,12 @@ $('#searchPage').die('pageinit').live('pageinit', function(event) {
     $('#searchBox').val(getLocalStorage('lastSearchKey', ''));
     
 	$('#searchButton').unbind('click').bind('click', function(e) {
+		e.preventDefault();
+		$('#searchForm').submit();
+		return false;
+	});
+	
+	$('#searchForm').unbind('submit').bind('submit', function(e) {
 		e.preventDefault();
 		var key = $("#searchBox").val();
 		

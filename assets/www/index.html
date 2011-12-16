@@ -56,11 +56,17 @@ if (isLoggedIn()) {
 	                </p>
                 </form>
 	            New user? <a href="signup.html" data-role="button">Sign up!</a>
-	            <p style="margin-top: 100px">Version 1.0.4</p>
+	            <p style="margin-top: 100px">Version 1.1.6</p>
 		    </div>
 		    <script type="text/javascript">
 $('#indexPage').die('pageinit').live('pageinit', function(event) {
 	$('#login').unbind('click').bind('click', function(e) {
+		e.preventDefault();
+		$('#loginForm').submit();
+		return false;
+	});
+	
+	$('#loginForm').unbind('submit').bind('submit', function(e) {
 		e.preventDefault();
 		
 		var url = getRemoteBaseURL() + '/login';
@@ -75,6 +81,8 @@ $('#indexPage').die('pageinit').live('pageinit', function(event) {
 				showFormErrors(data.errors);
 			}
 		});
+		
+		return false;
 	});
 });
 		    </script>

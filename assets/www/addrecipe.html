@@ -171,7 +171,13 @@ $('#addrecipePage').die('pageshow').live('pageshow', function() {
 		updateIngredientList();
 	});
 	
-	$('#addrecipeForm :submit').unbind('click').bind('click', function(e) {
+	$('#addrecipePage :submit').unbind('click').bind('click', function(e) {
+		e.preventDefault();
+		$('#addrecipeForm').submit();
+		return false;
+	});
+	
+	$('#addrecipeForm').unbind('submit').bind('submit', function(e) {
 		e.preventDefault();
 		$.mobile.showPageLoadingMsg();
 		
@@ -270,6 +276,8 @@ $('#addrecipePage').die('pageshow').live('pageshow', function() {
 				}
 			}
 		});
+		
+		return false;
 	});
 	
 	$('#deleteRecipeButton').unbind('click').bind('click', function() {

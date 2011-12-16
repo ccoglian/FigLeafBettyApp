@@ -31,7 +31,7 @@
 		  	</div>
 		  	<div data-role="content" data-theme="f">
 		  		<h3 style="margin-bottom: 5px;">Things to buy</h3>
-		  		<form>
+		  		<form id="shoppinglistForm">
 			  		<div>
 			  			<input id="extraItem" type="text" data-inline="true" style="display: inline; width: 60%"></input>
 			  			<button id="addExtraToShoppingListButton" type="submit" data-icon="plus" data-inline="true" style="display: inline">Add</button>
@@ -138,11 +138,17 @@ $('#clearShoppingListButton').die('click').live('click', function(e) {
 	});
 });
 
-$('#addExtraToShoppingListButton').live('click', function(e) {
+$('#addExtraToShoppingListButton').unbind('click').bind('click', function(e) {
+	e.preventDefault();
+	$('#shoppinglistForm').submit();
+	return false;
+});
+
+$('#shoppinglistForm').unbind('submit').bind('submit', function(e) {
 	e.preventDefault();
 	var item_name = $('#extraItem').val();
 	
-	if (!item_name || item_name.length == 0) return;
+	if (!item_name || item_name.length == 0) return false;
 	
 	var url = getRemoteBaseURL() + "/shoppinglist/addextra/";
 	$.post(url, {user_id: getUserId(), 'item_name': item_name}, function(data) {
@@ -161,6 +167,8 @@ $('#addExtraToShoppingListButton').live('click', function(e) {
 			$('#extraItem').val('');
 		}
 	});
+	
+	return false;
 });
 			</script>
 		</div>
