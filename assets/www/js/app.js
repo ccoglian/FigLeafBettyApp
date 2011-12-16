@@ -1,4 +1,4 @@
-alert('1.0.2');
+alert('1.0.3');
 
 $.ajaxSetup({
 	cache: false,
