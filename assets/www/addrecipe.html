@@ -264,7 +264,6 @@ $('#addrecipePage').die('pageshow').live('pageshow', function() {
 	            	});
 				} else if ($('#imageMobile').val()) {
 					uploadPhoto($('#imageMobile').val());
-					$('#addrecipePage').trigger('pageshow'); // reload to set up all the IDs everywhere
    				} else {
 					$('#addrecipePage').trigger('pageshow'); // reload to set up all the IDs everywhere
 				}
@@ -545,6 +544,7 @@ function uploadPhoto(imageURI) {
 			console.log("Code = " + r.responseCode);
 			console.log("Response = " + r.response);
 			console.log("Sent = " + r.bytesSent);
+			$('#addrecipePage').trigger('pageshow'); // reload to set up all the IDs everywhere
 		},
 		function(error) {
 			alert("An error has occurred: Code = " = error.code);

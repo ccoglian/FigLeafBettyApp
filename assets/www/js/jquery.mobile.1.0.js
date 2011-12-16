@@ -2649,12 +2649,12 @@ $.widget( "mobile.page", $.mobile.widget, {
 			// The absolute version of the URL passed into the function. This
 			// version of the URL may contain dialog/subpage params in it.
 			absUrl = path.makeUrlAbsolute( url, findBaseWithDefault() );
-console.log("url: " + url);
-console.log("activePage: " + $.mobile.activePage);
-console.log("getClosestBaseUrl(): " + getClosestBaseUrl( $.mobile.activePage ));
-console.log("documentBase.hrefNoHash: " + documentBase.hrefNoHash);
-console.log("findBaseWithDefault(): " + findBaseWithDefault());
-console.log("absUrl: " + absUrl);
+//console.log("url: " + url);
+//console.log("activePage: " + $.mobile.activePage);
+//console.log("getClosestBaseUrl(): " + getClosestBaseUrl( $.mobile.activePage ));
+//console.log("documentBase.hrefNoHash: " + documentBase.hrefNoHash);
+//console.log("findBaseWithDefault(): " + findBaseWithDefault());
+//console.log("absUrl: " + absUrl);
 		
 		// If the caller provided data, and we're using "get" request,
 		// append the data to the URL.
@@ -2678,8 +2678,8 @@ console.log("absUrl: " + absUrl);
 			// path. For cross-domain pages (Phone Gap only) the entire absolute Url
 			// used to load the page.
 			dataUrl = path.convertUrlToDataUrl( absUrl );
-console.log("fileUrl: " + fileUrl);
-console.log("dataUrl: " + dataUrl);
+//console.log("fileUrl: " + fileUrl);
+//console.log("dataUrl: " + dataUrl);
 		// Make sure we have a pageContainer to work with.
 		settings.pageContainer = settings.pageContainer || $.mobile.pageContainer;
 
