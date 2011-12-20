@@ -2,14 +2,20 @@ $.ajaxSetup({
 	cache: false,
 });
 
+var testing = false;
+
 // Where do we get our data from (e.g. recipes, etc.)
 function getRemoteBaseURL() {
-	if (navigator.camera) {
-		return 'http://192.168.1.100'; // for testing on the phone or the emulator
-//		return 'http://10.0.2.2'; // for testing on the emulator
+	if (testing) {
+		if (navigator.camera) {
+			return 'http://192.168.1.100'; // for testing on the phone or the emulator
+	//		return 'http://10.0.2.2'; // for testing on the emulator
+		}
+	//	return 'http://local.figleafbetty.com';
+		return 'http://localhost';
 	}
-//	return 'http://local.figleafbetty.com';
-	return 'http://localhost';
+	
+	return 'http://rest.figleafbetty.com';
 }
 
 document.addEventListener("deviceready", myDeviceReadyListener, false);
