@@ -62,7 +62,7 @@ $('#makeitPage').die('pageshow').live('pageshow', function(event) {
 		$('input[id^=date]').each(function(input) {
 			var recipe_reminder_id = $(this).attr('recipe_reminder_id');
 			var scheduled_reminder_id = $(this).attr('scheduled_reminder_id');
-			var description = $('label[for=' + $(this).attr('id') + ']').val();
+			var description = $('label[for=' + $(this).attr('id') + ']').text();
 			var local_time = $(this).val();
 			
 			if (recipe_reminder_id >= 1) {
