@@ -1,5 +1,6 @@
 $.ajaxSetup({
 	cache: false,
+	dataType: 'json',
 });
 
 var testing = false;
@@ -144,15 +145,13 @@ function getStatusBox(title, msg, type) {
 
 function showFormErrors(errors) {
 	$('td[id$="_status_box"]:visible').empty(); // ends with
-    $.each(errors, function(key, value) {
+    $.each(errors || [], function(key, value) {
         $('[id=' + key + '_status_box]:visible').html(getStatusBox($('label[for=' + key + ']:visible').text() + ':', value, 'error'));
     });
 }
 
 function logAnyErrors(data) {
-	if (!data.success) {
-		$.each(data.errors, function(key, value) { console.log(key + ": " + value); });
-	}
+	$.each(data.errors || [], function(key, value) { console.log(key + ": " + value); });
 	
 	return data.success;
 }
